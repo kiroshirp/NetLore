@@ -5,13 +5,27 @@
 .directory-group {margin-top:28px;}
 .directory-group>h3 {font:600 17px 'Segoe UI',sans-serif;margin-bottom:16px;}
 .directory-group>h3>span {color:var(--muted);font-size:12px;margin-left:8px;}
-.directory .server-card {display:flex;flex-direction:column;padding:20px;min-width:0;border:1px solid #3b475c;border-radius:13px;background:#131f31;box-shadow:0 4px 0 #030711;}
-.directory .server-promoted {border:1px solid var(--pink);box-shadow:inset 0 0 0 1px #ff36b41c,0 4px 0 #030711;}
+.directory .server-card {--card-edge:#53657e;--card-accent:#bdcde3;--card-halo:#7798c714;display:flex;flex-direction:column;padding:0;min-width:0;border:1px solid var(--card-edge);border-radius:18px;background:radial-gradient(ellipse at 100% 0,var(--card-halo),transparent 62%),linear-gradient(145deg,#213148,#111b2b 70%);box-shadow:inset 0 1px 0 #ffffff26,inset 0 -5px 0 #03091166,0 6px 0 #030711,0 14px 24px #03071155;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;}
+.directory .server-promoted {--card-edge:var(--pink);--card-accent:#ff9dd9;--card-halo:#ff36b41c;}
 .directory .server-free .server-meta {color:#a6b3c7;}
-.directory .server-meta {margin-top:0;font-size:10px;text-transform:uppercase;letter-spacing:.06em;}
-.directory .server-card h4 {font:650 23px/1.2 'Segoe UI',sans-serif;overflow-wrap:anywhere;margin:15px 0 12px;}
-.server-category {align-self:flex-start;padding:5px 9px;background:#223047;border:1px solid #3a4760;border-radius:5px;font-size:11px;color:#c7d1e0;}
+.directory .server-meta {margin-top:0;font-size:9px;text-transform:uppercase;letter-spacing:.09em;display:flex;align-items:center;justify-content:flex-start;gap:7px;line-height:1.5;}
+.directory .server-card h4 {font:650 25px/1.2 'Segoe UI',sans-serif;letter-spacing:-.025em;overflow-wrap:anywhere;margin:18px 0 13px;}
+.server-category {align-self:flex-start;padding:6px 10px;background:linear-gradient(145deg,#2a3a53,#1a273b);border:1px solid #495973;border-radius:7px;font-size:11px;color:#d5dfed;box-shadow:inset 0 1px 0 #ffffff12,0 2px 0 #060c17;}
 .directory .server-card p {margin-top:14px;font-size:13px;}
-.directory .server-card a {margin-top:auto;padding-top:18px;min-height:46px;font-size:13px;}
+.directory .server-card .server-card-link {display:flex;flex-direction:column;position:relative;width:100%;height:100%;min-height:260px;margin:0;padding:23px 22px 20px;border-radius:17px;font-size:13px;text-decoration:none;outline-offset:5px;-webkit-tap-highlight-color:transparent;}
+.server-card-top {display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.server-status-dot {width:5px;height:5px;border-radius:50%;flex-shrink:0;background:var(--card-accent);box-shadow:0 0 8px var(--card-halo);}
+.server-card-emblem {display:grid;place-items:center;flex-shrink:0;width:35px;height:35px;border:1px solid #ffffff18;border-radius:10px;color:var(--card-accent);background:linear-gradient(145deg,#ffffff0d,#00000017);box-shadow:inset 0 1px 0 #ffffff12,0 3px 0 #03071155;}
+.server-card-action {display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;margin-top:auto;padding-top:22px;font-size:12px;font-weight:600;color:#e0e6f0;}
+.server-card-arrow {display:grid;place-items:center;width:35px;height:32px;flex-shrink:0;border:1px solid #6b7d982e;border-radius:9px;color:var(--card-accent);font-size:20px;background:linear-gradient(145deg,#2a3950,#172237);box-shadow:inset 0 1px 0 #ffffff20,0 3px 0 #030711;transition:transform .18s ease;}
+.directory .server-promoted .server-card-arrow {border-color:#ff70c84a;background:linear-gradient(145deg,#59314f,#2c2136);}
+@media(hover:hover) and (pointer:fine) {
+ .directory .server-card:hover {transform:translateY(-3px);box-shadow:inset 0 1px 0 #ffffff36,inset 0 -5px 0 #03091166,0 9px 0 #030711,0 18px 30px #03071188,0 0 24px var(--card-halo);}
+ .server-card:hover .server-card-arrow {transform:translate(2px,-2px);}
+}
+.directory .server-card:active {transform:translateY(3px);box-shadow:inset 0 1px 0 #ffffff1a,inset 0 -2px 0 #03091166,0 2px 0 #030711,0 6px 12px #03071155;}
+.directory .server-card:focus-within {outline:2px solid var(--card-accent);outline-offset:4px;}
+.directory .server-card-link:focus-visible {outline:none;}
+@media(prefers-reduced-motion:reduce) {.directory .server-card,.server-card-arrow{transition:none;}.directory .server-card:hover,.directory .server-card:active,.server-card:hover .server-card-arrow{transform:none;}}
 .directory-status {font-size:14px;color:var(--muted);padding-block:24px;line-height:1.6;}
 .directory-status .button {margin-top:15px;}
