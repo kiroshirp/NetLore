@@ -1,13 +1,13 @@
 import { useLayoutEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const routes = { '/': 'inicio', '/servidores/': 'servidores', '/promocion/': 'promocion', '/privacidad/': 'contenido', '/cookies/': 'contenido' };
+const routes = { '/': 'inicio', '/servidores/': 'servidores', '/promocion/': 'promocion', '/informacion/': 'informacion', '/privacidad/': 'contenido', '/cookies/': 'contenido' };
 const oldRoutes = { '#inicio': '/', '#contenido': '/', '#servidores': '/servidores/', '#promocion': '/promocion/' };
 
 export function scrollToSection(id, focus = false) {
   const target = document.getElementById(id);
   if (!target) return;
-  if (id === 'inicio') window.scrollTo({ top: 0, behavior: 'instant' });
+  if (id === 'inicio' || target.closest('.map-portal')) window.scrollTo({ top: 0, behavior: 'instant' });
   else target.scrollIntoView({ block: 'start', behavior: 'instant' });
   if (focus) {
     const heading = target.querySelector('h1, h2') || target;
