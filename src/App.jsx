@@ -1,9 +1,11 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useLanguage } from './i18n';
 import { NavigationEffects, SectionLink, scrollToSection } from './navigation';
 import servers from './data/servers.json';
 import { copyRequestMessage } from './copy-request.mjs';
+import { CookiesPage, PrivacyNotice, PrivacyPage } from './Privacy';
+import { clearNetLorePreferences, NOTICE_KEY, NOTICE_VERSION, readLocal, writeLocal } from './privacy-storage.mjs';
 
 const discordUrl = 'https://discord.gg/YkKv6X6gQB';
 const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
@@ -126,10 +128,16 @@ function RequestPromotion() {
           <h4>{t.discordStep}</h4>
           <DiscordLink className="button button-pink" accessibleHint>{t.openDiscord}</DiscordLink>
           <p className="discord-note">{t.discordInstructions}</p>
+          <RequestPrivacyNote />
         </div>
       </li>
     </ol>
   </div>;
+}
+
+function RequestPrivacyNote() {
+  const { legal } = useLanguage();
+  return <p className="request-privacy-note">{legal.requestNote} <SectionLink to="/privacidad/">{legal.privacy.title}</SectionLink>.</p>;
 }
 
 function Promotion() {
@@ -161,10 +169,11 @@ function Questions() {
   </section>;
 }
 
-function Footer() {
-  const { t } = useLanguage();
+function Footer({ onOpenNotice, noticeTriggerRef }) {
+  const { t, legal } = useLanguage();
   return <footer className="footer shell">
     <div className="footer-top"><p className="footer-description"><strong>NETLORE</strong><span>{t.footerDescription}</span></p><SectionLink className="text-link" to="/promocion/"><span>{t.promoteServer}</span><Arrow /></SectionLink></div>
+    <div className="footer-legal"><SectionLink to="/privacidad/">{legal.privacy.title}</SectionLink><SectionLink to="/cookies/">{legal.cookies.title}</SectionLink><button type="button" ref={noticeTriggerRef} onClick={onOpenNotice}>{legal.openNotice}</button></div>
     <div className="footer-bottom"><span>{t.copyright}</span><SectionLink to="/"><span>{t.backTop}</span><Arrow>↑</Arrow></SectionLink></div>
   </footer>;
 }
@@ -179,12 +188,31 @@ function NotFound() {
 }
 
 export default function App() {
-  const { t } = useLanguage();
-  return <>
+  const { t, legal } = useLanguage();
+  const { pathname } = useLocation();
+  const [noticeVisible, setNoticeVisible] = useState(() => readLocal(NOTICE_KEY) !== NOTICE_VERSION);
+  const [focusNotice, setFocusNotice] = useState(false);
+  const noticeTriggerRef = useRef(null);
+  useEffect(() => {
+    document.title = pathname.startsWith('/privacidad') ? `${legal.privacy.title} — NetLore` : pathname.startsWith('/cookies') ? `${legal.cookies.title} — NetLore` : t.pageTitle;
+  }, [pathname, legal, t.pageTitle]);
+  function dismissNotice() {
+    writeLocal(NOTICE_KEY, NOTICE_VERSION);
+    setNoticeVisible(false);
+    setFocusNotice(false);
+  }
+  function openNotice() { setFocusNotice(true); setNoticeVisible(true); }
+  function clearPreferences() {
+    const success = clearNetLorePreferences();
+    if (success) { setFocusNotice(false); setNoticeVisible(true); }
+    return success;
+  }
+  return <div className={noticeVisible ? 'app-with-notice' : undefined}>
     <NavigationEffects />
     <button className="skip-link" type="button" onClick={() => scrollToSection('contenido', true)}>{t.skip}</button>
     <Header />
-    <Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="*" element={<NotFound />} /></Routes>
-    <Footer />
-  </>;
+    <Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes>
+    <Footer onOpenNotice={openNotice} noticeTriggerRef={noticeTriggerRef} />
+    {noticeVisible && <PrivacyNotice onDismiss={dismissNotice} focusOnOpen={focusNotice} returnFocusRef={noticeTriggerRef} />}
+  </div>;
 }

@@ -1,14 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import messages from './locales/messages.json';
+import legalMessages from './locales/legal.json';
+import { LANGUAGE_KEY, readLocal, writeLocal } from './privacy-storage.mjs';
 
 const LanguageContext = createContext(null);
-const storageKey = 'netlore.language';
 
 function savedLanguage() {
-  try {
-    const language = localStorage.getItem(storageKey);
-    if (Object.hasOwn(messages, language)) return language;
-  } catch { /* Storage can be disabled. */ }
+  const language = readLocal(LANGUAGE_KEY);
+  if (Object.hasOwn(messages, language)) return language;
   return 'es';
 }
 
@@ -18,16 +17,17 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     document.documentElement.lang = language;
-    document.title = t.pageTitle;
     document.querySelector('meta[name="description"]').content = t.metaDescription;
-    try { localStorage.setItem(storageKey, language); } catch { /* Keep this visit functional. */ }
   }, [language, t]);
 
   function changeLanguage(value) {
-    if (Object.hasOwn(messages, value)) setLanguage(value);
+    if (Object.hasOwn(messages, value)) {
+      setLanguage(value);
+      writeLocal(LANGUAGE_KEY, value);
+    }
   }
 
-  return <LanguageContext.Provider value={{ language, changeLanguage, t }}>{children}</LanguageContext.Provider>;
+  return <LanguageContext.Provider value={{ language, changeLanguage, t, legal: legalMessages[language] }}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {

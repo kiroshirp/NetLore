@@ -1,0 +1,269 @@
+{
+  "es": {
+    "backHome": "Volver al inicio",
+    "updated": "Actualizado:",
+    "navigation": "Información de privacidad",
+    "openNotice": "Volver a ver el aviso",
+    "opensNewTab": " (se abre en otra pestaña)",
+    "identityTitle": "Responsable y contacto",
+    "controller": "Responsable",
+    "project": "Proyecto personal",
+    "countryLabel": "País",
+    "country": "España",
+    "contact": "Contacto de privacidad",
+    "requestNote": "Los tickets se conservan para acreditar la gestión y atender incidencias o reclamaciones. Consulta la",
+    "notice": {
+      "title": "Tu privacidad en NetLore",
+      "body": "Usamos almacenamiento local para recordar el idioma que elijas y que has cerrado este aviso. No incorporamos analítica ni seguimiento publicitario. Puedes consultar las políticas y borrar estas preferencias.",
+      "dismiss": "Entendido"
+    },
+    "privacy": {
+      "title": "Política de privacidad",
+      "intro": "Información sobre la navegación en NetLore y la gestión de las solicitudes de promoción mediante el Discord de KiroshiRP.",
+      "sections": [
+        {
+          "title": "Datos y finalidades",
+          "paragraphs": [
+            "La web no dispone de registro de usuarios ni formularios de envío. Puedes consultar el directorio sin abrir un ticket. El botón de copiar solo escribe el mensaje preparado en tu portapapeles cuando lo pulsas; no lo envía al equipo.",
+            "Si solicitas una promoción, se trata el contenido del ticket de Discord y la información que aportes para presentar tu servidor, con el fin de atender la solicitud, gestionar su publicación y acreditar lo acordado. No envíes datos que no sean necesarios para esa gestión."
+          ]
+        },
+        {
+          "title": "Pagos previstos con Stripe",
+          "paragraphs": [
+            "Stripe es la pasarela prevista para los pagos. Los datos de seguimiento de pago indicados por el responsable son el importe y el estado del pago. Actualmente, esta web no integra un formulario de Stripe ni recoge datos de tarjeta.",
+            "Antes de realizar un pago, consulta la información de Stripe en el proceso de pago que se te facilite. No envíes números de tarjeta ni credenciales bancarias a los tickets."
+          ]
+        },
+        {
+          "title": "Bases jurídicas",
+          "paragraphs": [
+            "La gestión de solicitudes y promociones se basa en las medidas precontractuales que solicitas o en la ejecución del servicio (art. 6.1.b RGPD). La conservación necesaria para acreditar la gestión y atender reclamaciones responde al interés legítimo en defender lo acordado (art. 6.1.f RGPD), sujeto a tus derechos y a la necesidad de esa conservación. Las obligaciones legales se aplican cuando procedan (art. 6.1.c RGPD)."
+          ]
+        },
+        {
+          "title": "Conservación",
+          "paragraphs": [
+            "Los tickets se conservan como constancia de la solicitud y de lo realizado, para atender incidencias o reclamaciones. El criterio es conservar únicamente lo necesario durante la gestión de la promoción y, después, mientras sea necesario para esas responsabilidades o para cumplir una obligación legal aplicable, teniendo en cuenta los plazos de prescripción que correspondan.",
+            "Este criterio no equivale a una conservación indefinida: cuando dejen de existir esas necesidades, los datos deberán suprimirse o, si procede legalmente, mantenerse bloqueados. Los proveedores aplican además sus propias políticas de conservación."
+          ]
+        },
+        {
+          "title": "Información publicada",
+          "paragraphs": [
+            "Las fichas del directorio son públicas y muestran la información acordada para promocionar el servidor. Abrir un ticket no publica automáticamente su contenido. La web no incorpora elaboración de perfiles ni decisiones automatizadas sobre las solicitudes."
+          ]
+        }
+      ]
+    },
+    "providersTitle": "Servicios externos y transferencias",
+    "providersDescription": "GitHub Pages aloja esta web y registra direcciones IP por seguridad, según su documentación. Discord se utiliza para los tickets y Stripe es el proveedor de pagos previsto. Sus políticas describen tratamientos fuera del Espacio Económico Europeo y las garantías aplicables, como decisiones de adecuación o cláusulas contractuales tipo, según el caso. Consulta la información de cada servicio:",
+    "rightsTitle": "Tus derechos",
+    "rights": "Puedes solicitar acceso, rectificación, supresión, oposición, limitación y, cuando corresponda, portabilidad, escribiendo al contacto indicado. Especifica tu solicitud y los datos necesarios para localizarla; no adjuntes documentos de identidad de forma preventiva.",
+    "complaint": "También puedes presentar una reclamación ante la",
+    "cookies": {
+      "title": "Cookies y almacenamiento local",
+      "intro": "Qué guarda NetLore en tu navegador, para qué se utiliza y cómo eliminarlo.",
+      "usage": {
+        "title": "Uso real de este sitio",
+        "paragraphs": [
+          "El código de NetLore no establece cookies HTTP ni incorpora analítica o seguimiento publicitario. Utiliza localStorage, una tecnología del navegador distinta de las cookies, para las dos preferencias descritas a continuación. No se usan para identificarte con fines publicitarios ni para crear perfiles.",
+          "Este es un aviso informativo, no una solicitud de consentimiento para seguimiento. El idioma se guarda solo al elegirlo y el cierre del aviso solo al pulsar «Entendido». Sin elegir un idioma, la web utiliza español sin guardar esa elección por defecto."
+        ]
+      },
+      "inventoryTitle": "Preferencias de NetLore",
+      "items": [
+        { "title": "Idioma", "purpose": "Recuerda español, inglés o francés para mostrar la interfaz en tu idioma elegido.", "trigger": "Se guarda al utilizar el selector de idioma." },
+        { "title": "Cierre del aviso", "purpose": "Recuerda la versión del aviso que has cerrado para no repetirlo en cada visita.", "trigger": "Se guarda al pulsar «Entendido». No representa consentimiento para publicidad." }
+      ],
+      "duration": "Almacenamiento local propio, sin caducidad automática: permanece hasta que lo borres o el navegador elimine los datos del sitio.",
+      "controlsTitle": "Controlar estas preferencias",
+      "controls": "Puedes borrarlas con este botón o desde los ajustes del navegador. El botón elimina únicamente las dos preferencias de NetLore. No borra mensajes de Discord ni datos gestionados por Stripe. El idioma actual se mantiene durante esta visita; al recargar sin preferencia guardada, se utiliza español.",
+      "clear": "Borrar preferencias de NetLore",
+      "cleared": "Preferencias de NetLore borradas. El aviso volverá a mostrarse.",
+      "clearError": "El navegador no ha permitido borrar las preferencias. Puedes hacerlo desde sus ajustes de datos del sitio.",
+      "external": {
+        "title": "Al abrir otros servicios",
+        "paragraphs": ["Los enlaces a Discord y a las políticas de los proveedores te llevan a sitios externos con sus propias reglas de privacidad y cookies. La web no carga elementos incrustados de Discord ni de Stripe al visitarla. Si se añaden nuevas tecnologías o se integra el pago en la web, deberá actualizarse esta información y solicitar consentimiento cuando corresponda."]
+      }
+    }
+  },
+  "en": {
+    "backHome": "Back to home",
+    "updated": "Updated:",
+    "navigation": "Privacy information",
+    "openNotice": "Show the notice again",
+    "opensNewTab": " (opens in a new tab)",
+    "identityTitle": "Controller and contact",
+    "controller": "Controller",
+    "project": "Personal project",
+    "countryLabel": "Country",
+    "country": "Spain",
+    "contact": "Privacy contact",
+    "requestNote": "Tickets are retained to document the service and handle issues or claims. Read our",
+    "notice": {
+      "title": "Your privacy on NetLore",
+      "body": "We use local storage to remember the language you choose and that you have dismissed this notice. We do not include analytics or advertising tracking. You can read the policies and delete these preferences.",
+      "dismiss": "Understood"
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "intro": "Information about browsing NetLore and handling promotion requests through the KiroshiRP Discord.",
+      "sections": [
+        {
+          "title": "Data and purposes",
+          "paragraphs": [
+            "The website has no user registration or submission forms. You can browse the directory without opening a ticket. The copy button only writes the prepared message to your clipboard when pressed; it does not send it to the team.",
+            "When you request a promotion, the Discord ticket content and information you provide to introduce your server are processed to handle the request, manage publication and document what was agreed. Do not send data that is unnecessary for that purpose."
+          ]
+        },
+        {
+          "title": "Planned payments through Stripe",
+          "paragraphs": [
+            "Stripe is the planned payment provider. The payment tracking data specified by the controller are the amount and payment status. This website currently has no integrated Stripe form and does not collect card details.",
+            "Before making a payment, read Stripe’s information in the payment process provided to you. Do not send card numbers or banking credentials in tickets."
+          ]
+        },
+        {
+          "title": "Legal bases",
+          "paragraphs": [
+            "Handling requests and promotions relies on pre-contractual steps you request or performance of the service (GDPR Art. 6(1)(b)). Necessary retention to document the service and handle claims relies on the legitimate interest in defending what was agreed (Art. 6(1)(f)), subject to your rights and the need for retention. Legal obligations apply where relevant (Art. 6(1)(c))."
+          ]
+        },
+        {
+          "title": "Retention",
+          "paragraphs": [
+            "Tickets are retained as evidence of the request and work carried out, to handle issues or claims. The criterion is to retain only what is necessary while managing the promotion and afterwards for as long as needed for those liabilities or an applicable legal obligation, taking relevant limitation periods into account.",
+            "This does not mean indefinite retention: when those needs no longer exist, the data must be deleted or, where legally required, kept blocked from ordinary use. Providers also apply their own retention policies."
+          ]
+        },
+        {
+          "title": "Published information",
+          "paragraphs": [
+            "Directory listings are public and display the information agreed for promoting the server. Opening a ticket does not automatically publish its content. The website does not include profiling or automated decisions about requests."
+          ]
+        }
+      ]
+    },
+    "providersTitle": "External services and transfers",
+    "providersDescription": "GitHub Pages hosts this website and logs IP addresses for security, according to its documentation. Discord is used for tickets and Stripe is the planned payment provider. Their policies describe processing outside the European Economic Area and applicable safeguards, such as adequacy decisions or standard contractual clauses, as appropriate. Read each service’s information:",
+    "rightsTitle": "Your rights",
+    "rights": "You can request access, rectification, erasure, objection, restriction and, where applicable, portability by writing to the contact provided. Explain your request and provide the information needed to locate it; do not attach identity documents pre-emptively.",
+    "complaint": "You can also lodge a complaint with the",
+    "cookies": {
+      "title": "Cookies and local storage",
+      "intro": "What NetLore stores in your browser, why it is used and how to remove it.",
+      "usage": {
+        "title": "What this website actually uses",
+        "paragraphs": [
+          "NetLore’s code does not set HTTP cookies or include analytics or advertising tracking. It uses localStorage, a browser technology different from cookies, for the two preferences described below. They are not used to identify you for advertising or build profiles.",
+          "This is an informational notice, not a request for tracking consent. The language is stored only when you choose it and the dismissal only when you press ‘Understood’. Without a language choice, the website uses Spanish without storing that default choice."
+        ]
+      },
+      "inventoryTitle": "NetLore preferences",
+      "items": [
+        { "title": "Language", "purpose": "Remembers Spanish, English or French to display the interface in your chosen language.", "trigger": "Stored when you use the language selector." },
+        { "title": "Notice dismissal", "purpose": "Remembers the version of the notice you dismissed so it is not repeated on each visit.", "trigger": "Stored when you press ‘Understood’. It does not represent consent to advertising." }
+      ],
+      "duration": "First-party local storage with no automatic expiry: it remains until you delete it or your browser clears the site data.",
+      "controlsTitle": "Control these preferences",
+      "controls": "You can delete them using this button or your browser settings. The button removes only NetLore’s two preferences. It does not delete Discord messages or data handled by Stripe. Your current language remains for this visit; reloading without a saved preference uses Spanish.",
+      "clear": "Delete NetLore preferences",
+      "cleared": "NetLore preferences deleted. The notice will appear again.",
+      "clearError": "The browser did not allow the preferences to be deleted. You can remove them through its site data settings.",
+      "external": {
+        "title": "When opening other services",
+        "paragraphs": ["Links to Discord and provider policies take you to external sites with their own privacy and cookie rules. This website does not load embedded Discord or Stripe content on a visit. If new technologies are added or payments are integrated into the website, this information must be updated and consent requested where required."]
+      }
+    }
+  },
+  "fr": {
+    "backHome": "Retour à l’accueil",
+    "updated": "Mise à jour :",
+    "navigation": "Informations sur la confidentialité",
+    "openNotice": "Revoir l’avis",
+    "opensNewTab": " (s’ouvre dans un nouvel onglet)",
+    "identityTitle": "Responsable et contact",
+    "controller": "Responsable du traitement",
+    "project": "Projet personnel",
+    "countryLabel": "Pays",
+    "country": "Espagne",
+    "contact": "Contact confidentialité",
+    "requestNote": "Les tickets sont conservés pour documenter la gestion et traiter les incidents ou réclamations. Consulte notre",
+    "notice": {
+      "title": "Ta confidentialité sur NetLore",
+      "body": "Nous utilisons le stockage local pour mémoriser la langue que tu choisis et la fermeture de cet avis. Nous n’intégrons ni outils d’analyse ni suivi publicitaire. Tu peux consulter les politiques et supprimer ces préférences.",
+      "dismiss": "Compris"
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "intro": "Informations sur la navigation sur NetLore et la gestion des demandes de promotion via le Discord de KiroshiRP.",
+      "sections": [
+        {
+          "title": "Données et finalités",
+          "paragraphs": [
+            "Le site ne propose ni inscription ni formulaire d’envoi. Tu peux consulter l’annuaire sans ouvrir de ticket. Le bouton de copie écrit uniquement le message préparé dans ton presse-papiers lorsque tu cliques dessus ; il ne l’envoie pas à l’équipe.",
+            "Si tu demandes une promotion, le contenu du ticket Discord et les informations fournies pour présenter ton serveur sont traités afin de gérer la demande, la publication et de conserver une trace de l’accord. N’envoie pas de données inutiles à cette gestion."
+          ]
+        },
+        {
+          "title": "Paiements prévus via Stripe",
+          "paragraphs": [
+            "Stripe est le prestataire de paiement prévu. Les données de suivi indiquées par le responsable sont le montant et le statut du paiement. Ce site n’intègre actuellement aucun formulaire Stripe et ne collecte pas de données de carte.",
+            "Avant de payer, consulte les informations de Stripe dans le parcours de paiement qui te sera fourni. N’envoie pas de numéros de carte ni d’identifiants bancaires dans les tickets."
+          ]
+        },
+        {
+          "title": "Bases juridiques",
+          "paragraphs": [
+            "La gestion des demandes et promotions repose sur les mesures précontractuelles demandées ou l’exécution du service (art. 6.1.b du RGPD). La conservation nécessaire pour documenter la gestion et traiter les réclamations repose sur l’intérêt légitime à défendre l’accord (art. 6.1.f), sous réserve de tes droits et de la nécessité de cette conservation. Les obligations légales s’appliquent lorsqu’elles sont pertinentes (art. 6.1.c)."
+          ]
+        },
+        {
+          "title": "Conservation",
+          "paragraphs": [
+            "Les tickets sont conservés comme preuve de la demande et du travail effectué, pour traiter les incidents ou réclamations. Le critère est de conserver uniquement ce qui est nécessaire pendant la gestion de la promotion puis, au-delà, pour les responsabilités concernées ou une obligation légale applicable, en tenant compte des délais de prescription pertinents.",
+            "Cela ne signifie pas une conservation indéfinie : lorsque ces besoins disparaissent, les données doivent être supprimées ou, si la loi l’exige, conservées avec blocage de leur utilisation courante. Les prestataires appliquent aussi leurs propres politiques de conservation."
+          ]
+        },
+        {
+          "title": "Informations publiées",
+          "paragraphs": [
+            "Les fiches de l’annuaire sont publiques et affichent les informations convenues pour promouvoir le serveur. Ouvrir un ticket ne publie pas automatiquement son contenu. Le site n’intègre ni profilage ni décisions automatisées sur les demandes."
+          ]
+        }
+      ]
+    },
+    "providersTitle": "Services externes et transferts",
+    "providersDescription": "GitHub Pages héberge ce site et enregistre les adresses IP pour la sécurité, selon sa documentation. Discord est utilisé pour les tickets et Stripe est le prestataire de paiement prévu. Leurs politiques décrivent des traitements hors de l’Espace économique européen et les garanties applicables, comme des décisions d’adéquation ou des clauses contractuelles types, selon le cas. Consulte les informations de chaque service :",
+    "rightsTitle": "Tes droits",
+    "rights": "Tu peux demander l’accès, la rectification, l’effacement, l’opposition, la limitation et, le cas échéant, la portabilité en écrivant au contact indiqué. Précise ta demande et les informations nécessaires pour la retrouver ; ne joins pas de document d’identité de façon préventive.",
+    "complaint": "Tu peux aussi adresser une réclamation à l’",
+    "cookies": {
+      "title": "Cookies et stockage local",
+      "intro": "Ce que NetLore conserve dans ton navigateur, pourquoi et comment le supprimer.",
+      "usage": {
+        "title": "Utilisation réelle de ce site",
+        "paragraphs": [
+          "Le code de NetLore ne dépose pas de cookies HTTP et n’intègre ni outils d’analyse ni suivi publicitaire. Il utilise localStorage, une technologie du navigateur différente des cookies, pour les deux préférences décrites ci-dessous. Elles ne servent ni à t’identifier à des fins publicitaires ni à créer des profils.",
+          "Il s’agit d’un avis d’information, pas d’une demande de consentement au suivi. La langue est enregistrée uniquement quand tu la choisis et la fermeture de l’avis uniquement en cliquant sur « Compris ». Sans choix de langue, le site utilise l’espagnol sans enregistrer ce choix par défaut."
+        ]
+      },
+      "inventoryTitle": "Préférences NetLore",
+      "items": [
+        { "title": "Langue", "purpose": "Mémorise l’espagnol, l’anglais ou le français pour afficher l’interface dans la langue choisie.", "trigger": "Enregistrée lorsque tu utilises le sélecteur de langue." },
+        { "title": "Fermeture de l’avis", "purpose": "Mémorise la version de l’avis fermé pour ne pas le répéter à chaque visite.", "trigger": "Enregistrée quand tu cliques sur « Compris ». Ce n’est pas un consentement à la publicité." }
+      ],
+      "duration": "Stockage local propre au site, sans expiration automatique : il reste jusqu’à sa suppression par toi ou par le navigateur.",
+      "controlsTitle": "Gérer ces préférences",
+      "controls": "Tu peux les supprimer avec ce bouton ou dans les paramètres du navigateur. Le bouton supprime uniquement les deux préférences NetLore, pas les messages Discord ni les données traitées par Stripe. La langue actuelle reste utilisée pendant cette visite ; recharger sans préférence enregistrée rétablit l’espagnol.",
+      "clear": "Supprimer les préférences NetLore",
+      "cleared": "Préférences NetLore supprimées. L’avis réapparaîtra.",
+      "clearError": "Le navigateur n’a pas autorisé la suppression. Tu peux effacer ces préférences dans ses paramètres de données des sites.",
+      "external": {
+        "title": "En ouvrant d’autres services",
+        "paragraphs": ["Les liens vers Discord et les politiques des prestataires ouvrent des sites externes avec leurs propres règles de confidentialité et de cookies. Le site ne charge aucun contenu Discord ou Stripe intégré lors de la visite. Si de nouvelles technologies ou un paiement intégré sont ajoutés, ces informations devront être mises à jour et un consentement demandé si nécessaire."]
+      }
+    }
+  }
+}
