@@ -3,7 +3,7 @@ import { useLanguage } from './i18n';
 import { NavigationEffects, SectionLink, scrollToSection } from './navigation';
 
 const discordUrl = 'https://discord.gg/YkKv6X6gQB';
-const asset = (name) => `/assets/${name}`;
+const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
 const Arrow = ({ children = '↗' }) => <span aria-hidden="true">{children}</span>;
 
 function Eyebrow({ children }) {

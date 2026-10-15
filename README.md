@@ -22,4 +22,6 @@ npm run preview
 
 La versión para publicar se genera en `dist/`.
 
+GitHub Pages se actualiza automáticamente al publicar cambios en `main`.
+
 Construido con React y Vite.
