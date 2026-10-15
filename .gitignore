@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.local/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.codex/
+.agents/
+coverage/
+
+# Previous static implementation, retained locally during migration.
+/assets/
+/styles.css
+/i18n.js
+/navigation.js
+/build.mjs
+/servidores/
+/promocion/
