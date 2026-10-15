@@ -5,6 +5,7 @@ export const legalContact = Object.freeze({
 });
 
 export const privacySources = Object.freeze([
+  { name: 'Cloudflare', url: 'https://www.cloudflare.com/privacypolicy/' },
   { name: 'GitHub', url: 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement' },
   { name: 'Discord', url: 'https://discord.com/privacy' },
   { name: 'Stripe', url: 'https://stripe.com/privacy' },

@@ -24,4 +24,6 @@ La versión para publicar se genera en `dist/`.
 
 GitHub Pages se actualiza automáticamente al publicar cambios en `main`.
 
+El panel `/admin/` permite gestionar fichas gratuitas y promocionadas. La API y los datos se alojan en Cloudflare Workers y D1; su despliegue es independiente del sitio estático. Las credenciales deben mantenerse como secretos del servidor y nunca como variables `VITE_*`.
+
 Construido con React y Vite.

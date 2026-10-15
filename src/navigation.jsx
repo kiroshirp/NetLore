@@ -1,7 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const routes = { '/': 'inicio', '/servidores/': 'servidores', '/promocion/': 'promocion', '/informacion/': 'informacion', '/privacidad/': 'contenido', '/cookies/': 'contenido' };
+const routes = { '/': 'inicio', '/servidores/': 'servidores', '/promocion/': 'promocion', '/informacion/': 'informacion', '/privacidad/': 'contenido', '/cookies/': 'contenido', '/admin/': 'contenido' };
 const oldRoutes = { '#inicio': '/', '#contenido': '/', '#servidores': '/servidores/', '#promocion': '/promocion/' };
 
 export function scrollToSection(id, focus = false) {

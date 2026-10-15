@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useLanguage } from './i18n';
 import { NavigationEffects, SectionLink, scrollToSection } from './navigation';
-import servers from './data/servers.json';
+import ServerDirectory from './Directory';
+import Admin from './Admin';
 import { copyRequestMessage } from './copy-request.mjs';
 import { CookiesPage, PrivacyNotice, PrivacyPage } from './Privacy';
 import { clearNetLorePreferences, NOTICE_KEY, NOTICE_VERSION, readLocal, writeLocal } from './privacy-storage.mjs';
@@ -66,21 +67,7 @@ function Hero() {
 }
 
 function Directory() {
-  const { t } = useLanguage();
-  return <section className="directory shell" id="servidores" aria-labelledby="directory-title">
-    <div className="section-heading">
-      <div><Eyebrow>{t.directoryEyebrow}</Eyebrow><h2 id="directory-title">{t.directoryTitle}</h2></div>
-      <span className="category-label">CYBERPUNK <Arrow>/</Arrow> OPEN2077</span>
-    </div>
-    <p className="directory-description">{t.directoryDescription}</p>
-    <div className="server-grid">
-      {servers.length ? servers.map((server) => <ServerCard key={server.id} server={server} />) : <div className="directory-empty">
-        <div className="empty-mark" aria-hidden="true"><span /><span /><span /></div>
-        <div className="empty-copy"><p className="eyebrow">{t.emptyEyebrow}</p><h3>{t.emptyTitle}</h3><p>{t.emptyDescription}</p></div>
-        <SectionLink className="text-link" to="/promocion/"><span>{t.appearHere}</span><Arrow /></SectionLink>
-      </div>}
-    </div>
-  </section>;
+  return <ServerDirectory />;
 }
 
 function ServerCard({ server }) {
@@ -195,7 +182,7 @@ export default function App() {
   const [focusNotice, setFocusNotice] = useState(false);
   const noticeTriggerRef = useRef(null);
   useEffect(() => {
-    document.title = pathname.startsWith('/privacidad') ? `${legal.privacy.title} — NetLore` : pathname.startsWith('/cookies') ? `${legal.cookies.title} — NetLore` : t.pageTitle;
+    document.title = pathname.startsWith('/admin') ? 'Admin — NetLore' : pathname.startsWith('/privacidad') ? `${legal.privacy.title} — NetLore` : pathname.startsWith('/cookies') ? `${legal.cookies.title} — NetLore` : t.pageTitle;
   }, [pathname, legal, t.pageTitle]);
   function dismissNotice() {
     writeLocal(NOTICE_KEY, NOTICE_VERSION);
@@ -213,7 +200,7 @@ export default function App() {
     <NavigationEffects />
     <button className="skip-link" type="button" onClick={() => scrollToSection('contenido', true)}>{t.skip}</button>
     <Header />
-    <Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes>
+    <Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/admin/" element={<Admin />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes>
     <Footer onOpenNotice={openNotice} noticeTriggerRef={noticeTriggerRef} />
     {noticeVisible && <PrivacyNotice onDismiss={dismissNotice} focusOnOpen={focusNotice} returnFocusRef={noticeTriggerRef} />}
   </div>;
