@@ -208,7 +208,8 @@ export default function App() {
     if (success) { setFocusNotice(false); setNoticeVisible(true); }
     return success;
   }
-  return <div className={noticeVisible ? 'app-with-notice' : undefined}>
+  const isPortal = ['/', '/index.html', '/servidores/', '/promocion/', '/informacion/'].includes(pathname);
+  return <div className={`${noticeVisible ? 'app-with-notice' : ''} ${isPortal ? 'map-application' : ''}`}>
     <NavigationEffects />
     <button className="skip-link" type="button" onClick={() => scrollToSection('contenido', true)}>{t.skip}</button>
     <Header />
