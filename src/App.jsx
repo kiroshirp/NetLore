@@ -1,6 +1,9 @@
+import { useRef, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useLanguage } from './i18n';
 import { NavigationEffects, SectionLink, scrollToSection } from './navigation';
+import servers from './data/servers.json';
+import { copyRequestMessage } from './copy-request.mjs';
 
 const discordUrl = 'https://discord.gg/YkKv6X6gQB';
 const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
@@ -13,7 +16,7 @@ function Eyebrow({ children }) {
 function DiscordLink({ children, className = '', accessibleHint = false }) {
   const { t } = useLanguage();
   return <a className={className} href={discordUrl} target="_blank" rel="noopener noreferrer">
-    <span>{children}</span><Arrow />{accessibleHint && <span className="sr-only">{t.discordNewTab}</span>}
+    <span>{children}</span><Arrow />{accessibleHint && <span className="sr-only">{t.opensNewTab}</span>}
   </a>;
 }
 
@@ -22,19 +25,19 @@ function Header() {
   const { pathname } = useLocation();
   return <header className="site-header">
     <div className="header-inner shell">
-      <SectionLink className="brand" to="/" aria-label={t.home}><img src={asset('netlore-logo.png')} width="1536" height="559" alt="NetLore" /></SectionLink>
+      <SectionLink className="brand" to="/" aria-label={t.home}><img src={asset('netlore-logo.webp')} width="768" height="280" alt="NetLore" /></SectionLink>
       <span className="brand-caption"><span>{t.brandLine1}</span><br /><span>{t.brandLine2}</span></span>
       <nav aria-label={t.navigation}>
         <SectionLink to="/servidores/" aria-current={pathname === '/servidores/' ? 'location' : undefined}>{t.navServers}</SectionLink>
         <SectionLink to="/promocion/" aria-current={pathname === '/promocion/' ? 'location' : undefined}>{t.navPromotion}</SectionLink>
       </nav>
       <div className="language-switch">
-        <label htmlFor="language">{t.language}</label>
+        <label className="sr-only" htmlFor="language">{t.language}</label>
         <select id="language" name="language" value={language} onChange={(event) => changeLanguage(event.target.value)}>
-          <option value="es" lang="es">Español</option><option value="en" lang="en">English</option><option value="fr" lang="fr">Français</option>
+          <option value="es" lang="es" aria-label="Español">ES</option><option value="en" lang="en" aria-label="English">EN</option><option value="fr" lang="fr" aria-label="Français">FR</option>
         </select>
       </div>
-      <DiscordLink className="button button-pink header-action" accessibleHint>{t.promoteServer}</DiscordLink>
+      <SectionLink className="button button-pink header-action" to="/promocion/"><span>{t.headerPromote}</span><Arrow>↓</Arrow></SectionLink>
     </div>
   </header>;
 }
@@ -42,16 +45,18 @@ function Header() {
 function Hero() {
   const { t } = useLanguage();
   return <section className="hero" aria-labelledby="hero-title">
-    <img className="hero-image" src={asset('netlore-city.png')} width="1672" height="941" alt="" fetchPriority="high" />
+    <img className="hero-image" src={asset('netlore-city-1672.webp')} srcSet={[768, 1280, 1672].map((width) => `${asset(`netlore-city-${width}.webp`)} ${width}w`).join(', ')} sizes="100vw" width="1672" height="941" alt="" fetchPriority="high" />
     <div className="hero-shade" aria-hidden="true" />
     <div className="hero-inner shell">
       <div className="hero-copy">
         <Eyebrow>{t.heroEyebrow}</Eyebrow>
         <h1 id="hero-title"><span>{t.heroLine1}</span><br /><span>{t.heroLine2}</span>{' '}<em>{t.heroEmphasis}</em></h1>
-        <p className="hero-description"><span>{t.heroDescription1}</span><br /><span>{t.heroDescription2}</span></p>
-        <SectionLink className="hero-link" to="/servidores/"><span>{t.explore}</span><Arrow>↓</Arrow></SectionLink>
+        <p className="hero-description">{t.heroDescription2}</p>
+        <div className="hero-actions">
+          <SectionLink className="hero-link" to="/servidores/"><span>{t.explore}</span><Arrow>↓</Arrow></SectionLink>
+          <SectionLink className="hero-offer" to="/promocion/">{t.heroOffer}</SectionLink>
+        </div>
       </div>
-      <div className="hero-caption" aria-hidden="true"><span>{t.caption1}</span><b>{t.caption2}</b></div>
     </div>
     <div className="hero-foot shell"><span>{t.communityDirectory}</span><span>OPEN2077 <Arrow>↙</Arrow></span></div>
   </section>;
@@ -66,13 +71,65 @@ function Directory() {
     </div>
     <p className="directory-description">{t.directoryDescription}</p>
     <div className="server-grid">
-      <div className="directory-empty">
+      {servers.length ? servers.map((server) => <ServerCard key={server.id} server={server} />) : <div className="directory-empty">
         <div className="empty-mark" aria-hidden="true"><span /><span /><span /></div>
         <div className="empty-copy"><p className="eyebrow">{t.emptyEyebrow}</p><h3>{t.emptyTitle}</h3><p>{t.emptyDescription}</p></div>
         <SectionLink className="text-link" to="/promocion/"><span>{t.appearHere}</span><Arrow /></SectionLink>
-      </div>
+      </div>}
     </div>
   </section>;
+}
+
+function ServerCard({ server }) {
+  const { t } = useLanguage();
+  return <article className="server-card">
+    {server.image && <img src={server.image} alt="" width="640" height="400" loading="lazy" decoding="async" />}
+    <div className="server-meta"><span>{t.promotedListing}</span>{server.language && <span>{server.language}</span>}</div>
+    <h3>{server.name}</h3><p>{server.description}</p>
+    {server.url && <a className="text-link" href={server.url} target="_blank" rel="noopener noreferrer"><span>{t.visitServer}</span><Arrow /><span className="sr-only">{t.opensNewTab}</span></a>}
+  </article>;
+}
+
+function RequestPromotion() {
+  const { language, t } = useLanguage();
+  const messageRef = useRef(null);
+  const [copyResult, setCopyResult] = useState(null);
+  const status = copyResult?.language === language ? copyResult.status : 'idle';
+
+  async function copyMessage() {
+    const result = await copyRequestMessage(t.requestMessage, {
+      clipboard: navigator.clipboard,
+      selectMessage() {
+        messageRef.current?.focus();
+        messageRef.current?.select();
+      },
+    });
+    setCopyResult({ language, status: result });
+  }
+
+  return <div className="request-panel" aria-labelledby="request-title">
+    <h3 id="request-title">{t.requestTitle}</h3>
+    <p className="request-intro">{t.requestIntro}</p>
+    <ol className="request-steps">
+      <li>
+        <span className="step-number" aria-hidden="true">01</span>
+        <div className="request-step-content">
+          <label htmlFor="request-message">{t.copyStep}</label>
+          <textarea ref={messageRef} id="request-message" value={t.requestMessage} readOnly rows="4" spellCheck="false" aria-describedby="copy-status" />
+          <button className="button button-outline copy-button" type="button" onClick={copyMessage}>{status === 'copied' ? t.copied : t.copyMessage}<Arrow>{status === 'copied' ? '✓' : '⧉'}</Arrow></button>
+          <p className="copy-status" id="copy-status" role="status" aria-live="polite">{status === 'copied' ? t.copySuccess : status === 'manual' ? t.copyFallback : t.copyHint}</p>
+        </div>
+      </li>
+      <li>
+        <span className="step-number" aria-hidden="true">02</span>
+        <div className="request-step-content">
+          <h4>{t.discordStep}</h4>
+          <DiscordLink className="button button-pink" accessibleHint>{t.openDiscord}</DiscordLink>
+          <p className="discord-note">{t.discordInstructions}</p>
+        </div>
+      </li>
+    </ol>
+  </div>;
 }
 
 function Promotion() {
@@ -81,26 +138,13 @@ function Promotion() {
     <div className="promotion-copy">
       <Eyebrow>{t.promotionEyebrow}</Eyebrow>
       <h2 id="promotion-title"><span>{t.promotionLine1}</span><br /><em>{t.promotionLine2}</em></h2>
-      <p><span>{t.promotionDescription1}</span><br /><span>{t.promotionDescription2}</span></p>
-      <span className="promotion-note">{t.promotionNote}</span>
+      <p>{t.promotionDescription}</p>
+      <div className="price-panel"><p className="offer-label">{t.offer}</p><p className="price">5<span>{t.perMonth}</span></p><p className="price-note">{t.limitedTime}</p></div>
+      <h3 className="inclusion-heading">{t.inclusionTitle}</h3>
+      <ul className="inclusions">{['inclusionName', 'inclusionDescription', 'inclusionLink'].map((key) => <li key={key}><Arrow>↳</Arrow><span>{t[key]}</span></li>)}</ul>
+      <p className="promotion-note">{t.promotionTerms}</p>
     </div>
-    <div className="price-panel">
-      <p className="offer-label">{t.offer}</p><p className="price">5<span>{t.perMonth}</span></p>
-      <p className="price-note">{t.limitedTime}</p>
-      <div className="price-inclusion"><Arrow>↳</Arrow><span>{t.inclusion}</span></div>
-      <DiscordLink className="button button-pink" accessibleHint>{t.requestPromotion}</DiscordLink>
-      <p className="discord-note"><span>{t.discordNote1}</span><br /><span>{t.discordNote2}</span></p>
-    </div>
-  </section>;
-}
-
-function HowItWorks() {
-  const { t } = useLanguage();
-  return <section className="how shell" aria-labelledby="how-title">
-    <div className="how-heading"><Eyebrow>{t.howEyebrow}</Eyebrow><h2 id="how-title">{t.howTitle}</h2></div>
-    <ol className="steps">{[1, 2, 3].map((step) => <li key={step}>
-      <span className="step-number">0{step}</span><div><h3>{t[`step${step}Title`]}</h3><p>{t[`step${step}Description`]}</p></div>
-    </li>)}</ol>
+    <RequestPromotion />
   </section>;
 }
 
@@ -112,6 +156,7 @@ function Questions() {
       <details><summary><span>{t.faq1Question}</span><Arrow>+</Arrow></summary><p>{t.faq1Answer}</p></details>
       <details><summary><span>{t.faq2Question}</span><Arrow>+</Arrow></summary><p>{t.faq2Before}<a href={discordUrl} target="_blank" rel="noopener noreferrer">{t.discordName}</a>{t.faq2After}</p></details>
       <details><summary><span>{t.faq3Question}</span><Arrow>+</Arrow></summary><p>{t.faq3Answer}</p></details>
+      <details><summary><span>{t.faq4Question}</span><Arrow>+</Arrow></summary><p>{t.faq4Answer}</p></details>
     </div>
   </section>;
 }
@@ -119,14 +164,13 @@ function Questions() {
 function Footer() {
   const { t } = useLanguage();
   return <footer className="footer shell">
-    <div className="footer-top"><p><span>{t.footerLine1}</span><br /><strong>{t.footerLine2}</strong></p><DiscordLink className="text-link">{t.talkServer}</DiscordLink></div>
-    <div className="footer-wordmark" aria-hidden="true">NETLORE<span>↗</span></div>
+    <div className="footer-top"><p className="footer-description"><strong>NETLORE</strong><span>{t.footerDescription}</span></p><SectionLink className="text-link" to="/promocion/"><span>{t.promoteServer}</span><Arrow /></SectionLink></div>
     <div className="footer-bottom"><span>{t.copyright}</span><SectionLink to="/"><span>{t.backTop}</span><Arrow>↑</Arrow></SectionLink></div>
   </footer>;
 }
 
 function Portal() {
-  return <main id="contenido"><Hero /><Directory /><Promotion /><HowItWorks /><Questions /></main>;
+  return <main id="contenido"><Hero /><Directory /><Promotion /><Questions /></main>;
 }
 
 function NotFound() {
