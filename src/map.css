@@ -48,7 +48,7 @@
 .map-content .request-panel { margin-top:24px; padding:24px; }
 .map-back { display:inline-flex; align-items:center; min-height:32px; font-size:12px; color:#f4a6d9; }
 .map-content .section-heading { flex-wrap:wrap; gap:12px; }
-.map-detail .city-camera { left:calc(75% - 380px); transform-origin:60% 50%; }
+.map-detail .city-camera { transform-origin:50% 50%; }
 .map-detail .map-dock { position:fixed; top:50%; z-index:3; }
 .map-detail .map-tools { display:none; }
 .map-free .map-tools { display:flex; }
@@ -100,7 +100,6 @@
  .map-content .promotion h2 { font-size:42px; }
  .map-content .request-panel { padding:20px 12px; }
  .map-content h2 { font-size:30px; }
- .map-detail .city-camera { left:calc(50% - 325px); }
  .map-detail .map-dock { bottom:105px; }
  .map-portal + .footer { padding:14px 20px; }
  .city-pin strong { display:none; }

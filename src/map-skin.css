@@ -12,7 +12,9 @@
 .map-portal { height:100svh; min-height:700px; background:#080f1b; }
 .city-stage { z-index:-1; }
 .city-grid,.map-north,.map-status { display:none; }
-.city-camera { width:840px; height:955px; left:calc(50% - 420px); top:calc(50% - 477px); transition:transform 1.2s cubic-bezier(.2,.75,.2,1),left 1.2s,top 1.2s,scale 1.2s; }
+.city-camera { width:840px; height:955px; left:50%; top:50%; transform:translate3d(calc(-50% + var(--camera-x,0vw)),calc(-50% + var(--camera-y,0vh)),0) scale(var(--camera-scale,1)); transition:transform .9s cubic-bezier(.22,.75,.18,1); }
+.city-manual { position:relative; width:100%; height:100%; transform:translate3d(0,0,0) scale(1); transition:transform .32s cubic-bezier(.22,.75,.18,1); }
+.map-dragging .city-manual { transition:none; }
 .city-cartography,.map-home:not(.map-free) .city-cartography { opacity:.75; filter:none; mask-image:radial-gradient(ellipse,#000 42%,transparent 74%); object-fit:fill; }
 .city-stage::after { background:radial-gradient(ellipse at 50% 49%,transparent 20%,#080f1b55 63%,#080f1b 98%); }
 .city-pin>span,.city-pin strong { display:grid; place-items:center; min-width:42px; height:42px; border:1px solid #030812; border-radius:10px; background:linear-gradient(150deg,#253248,#111a2a); color:#c2cbd9; box-shadow:inset 0 1px 0 #ffffff22,inset 0 -3px 0 #0007,0 4px 0 #030711,0 8px 15px #0005; }
@@ -58,14 +60,15 @@
 .map-content .directory-empty { padding:24px 18px; border-radius:14px; border:1px solid #3b475c; background:#182438; }
 .map-content .price { font-family:'Segoe UI',sans-serif; font-size:64px; font-weight:650; }
 .map-back { color:#c1cad9; font-size:12px; }
-.map-detail .city-camera { left:calc(70% - 420px); top:calc(48% - 477px); scale:1.9; transform-origin:50% 50%; }
-.map-detail:has(#promocion) .city-camera { top:calc(35% - 477px); scale:2.3; }
-.map-detail:has(#informacion) .city-camera { top:calc(25% - 477px); scale:2.1; }
+.map-detail { --camera-x:20vw; --camera-y:-2vh; --camera-scale:1.9; }
+.map-detail:has(#promocion) { --camera-y:-15vh; --camera-scale:2.3; }
+.map-detail:has(#informacion) { --camera-y:-25vh; --camera-scale:2.1; }
 .map-detail .city-cartography { opacity:.9; }
 .map-detail .city-pin { transform:translate(-50%,-50%) scale(.5); }
 .map-content { background:#111c2dfa; }
 .map-detail .city-stage::after { background:linear-gradient(90deg,#080f1b77,transparent 70%); }
-.map-free .city-camera { left:calc(50% - 420px); top:calc(50% - 477px); scale:1.4; }
+.map-portal.map-free { --camera-x:0vw; --camera-y:0vh; --camera-scale:1.4; }
+.map-portal.map-free .city-camera { transition:transform .9s cubic-bezier(.22,.75,.18,1); }
 .map-tools { display:none; }
 .map-free .map-tools { bottom:74px; right:105px; }
 .map-tools button { background:linear-gradient(150deg,#223047,#111a2a); border:1px solid #465269; border-radius:10px; box-shadow:0 4px 0 #020611; }
@@ -75,8 +78,10 @@
 .map-application .footer-top,.map-application .footer-bottom { display:none; }
 .map-application .footer-legal { padding:0; gap:18px; }
 .map-application .footer-legal a,.map-application .footer-legal button { font-size:10px; color:#8895ac; min-height:28px; }
-@keyframes panel-in { from {opacity:0;translate:0 12px;} to {opacity:1;translate:0 0;} }
-@media(min-width:1600px) { .city-camera { width:980px; height:1114px; left:calc(50% - 490px); top:calc(50% - 557px); } }
+@keyframes panel-in { from {opacity:0;transform:translate3d(0,10px,0);} to {opacity:1;transform:translate3d(0,0,0);} }
+.map-content { animation:panel-in .32s cubic-bezier(.22,.75,.18,1) both; }
+.map-intro { animation:panel-in .42s cubic-bezier(.22,.75,.18,1) both; }
+@media(min-width:1600px) { .city-camera { width:980px; height:1114px; } }
 @media(max-width:900px) { .map-intro { padding-inline:75px; } .map-application .map-intro h1 { font-size:18vw; } .map-application .header-inner { gap:14px; } .map-content { left:20px; padding:24px; } }
 @media(max-width:600px) {
  .map-application .header-inner { width:calc(100% - 32px); min-height:72px; gap:10px; flex-wrap:nowrap; }
@@ -97,7 +102,7 @@
  .map-intro-actions { gap:10px; margin-top:26px; }
  .map-intro-actions .button { font-size:12px; min-height:48px; padding:12px 14px; }
  .map-scroll { font-size:10px; margin-top:32px; padding:9px 14px; }
- .city-camera { width:720px; height:818px; left:calc(50% - 360px); top:calc(50% - 409px); }
+ .city-camera { width:720px; height:818px; }
  .map-dock,.map-detail .map-dock,.map-dock:hover,.map-dock:focus-within { top:auto; bottom:65px; left:14px; right:14px; width:auto; transform:none; padding:0; border:0; background:transparent; box-shadow:none; flex-direction:row; gap:8px; justify-content:center; }
  .map-dock a,.map-dock button,.map-dock:hover a,.map-dock:hover button,.map-dock:focus-within a,.map-dock:focus-within button { width:48px; height:46px; min-height:46px; padding:8px; border-radius:11px; justify-content:center; }
  .map-dock a>span:nth-child(2),.map-dock .dock-text,.map-dock:hover .dock-text,.map-dock:focus-within .dock-text { display:none; }
@@ -111,6 +116,12 @@
  .map-application .footer-legal { gap:4px 12px; flex-wrap:wrap; }
  .map-application .footer-legal a,.map-application .footer-legal button { font-size:10px; min-height:24px; }
  .map-free .map-tools { bottom:130px; right:18px; }
- .map-free .city-camera { left:calc(50% - 360px); top:calc(50% - 409px); }
 }
-@media(prefers-reduced-motion:reduce) { .city-camera {transition:none;} .map-content {animation:none;} }
+@media(min-width:601px) {
+ .map-dock { transition:width .24s ease,padding .24s ease,background-color .24s ease; }
+ .map-dock a,.map-dock button { margin-left:auto; transition:width .24s ease,transform .16s ease,background-color .16s ease; }
+ .map-dock:hover a,.map-dock:hover button,.map-dock:focus-within a,.map-dock:focus-within button { height:58px; }
+ .map-dock .dock-text { display:block; opacity:0; max-width:0; overflow:hidden; transition:opacity .16s ease,max-width .24s ease; }
+ .map-dock:hover .dock-text,.map-dock:focus-within .dock-text { opacity:1; max-width:200px; }
+}
+@media(prefers-reduced-motion:reduce) { .map-portal .city-camera,.city-manual,.map-dock,.map-dock a,.map-dock button {transition:none;} .map-content,.map-intro {animation:none;} }

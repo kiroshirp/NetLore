@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLanguage } from './i18n';
 import { SectionLink } from './navigation';
@@ -17,12 +17,64 @@ const copy = {
 };
 
 export function MapPortal({directory,promotion,questions}) {
-  const { pathname } = useLocation();
+  const { pathname, key: routeKey } = useLocation();
   const { language,t } = useLanguage();
   const c = copy[language];
   const [free,setFree] = useState(false);
-  const [camera,setCamera] = useState({x:0,y:0,z:1});
+  const camera = useRef({x:0,y:0,z:1});
+  const manualRef = useRef(null);
+  const frame = useRef(0);
+  const [dragging,setDragging] = useState(false);
   const drag = useRef(null);
+  function paint() {
+    const {x,y,z} = camera.current;
+    if (manualRef.current) manualRef.current.style.transform = `translate3d(${x}px,${y}px,0) scale(${z})`;
+  }
+  function stopMotion() { cancelAnimationFrame(frame.current); frame.current = 0; }
+  function resetCamera() { stopMotion(); drag.current = null; setDragging(false); camera.current = {x:0,y:0,z:1}; paint(); }
+  useLayoutEffect(() => {
+    setFree(false);
+    resetCamera();
+    return stopMotion;
+  }, [pathname, routeKey]);
+  function pointerDown(event) {
+    if (!free || !event.isPrimary || event.button !== 0 || event.target.closest('a,button')) return;
+    stopMotion();
+    const outer = manualRef.current.parentElement;
+    const scale = outer.getBoundingClientRect().width / outer.offsetWidth;
+    drag.current = {x:event.clientX,y:event.clientY,time:performance.now(),vx:0,vy:0,scale};
+    setDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+  function pointerMove(event) {
+    const current = drag.current;
+    if (!current) return;
+    const now = performance.now(), dt = Math.max(8, now - current.time);
+    const dx = (event.clientX - current.x) / current.scale, dy = (event.clientY - current.y) / current.scale;
+    camera.current.x = Math.max(-700,Math.min(700,camera.current.x + dx));
+    camera.current.y = Math.max(-700,Math.min(700,camera.current.y + dy));
+    Object.assign(current,{x:event.clientX,y:event.clientY,time:now,vx:dx/dt,vy:dy/dt});
+    if (!frame.current) frame.current = requestAnimationFrame(() => {frame.current = 0; paint();});
+  }
+  function pointerUp(event) {
+    const current = drag.current;
+    if (!current) return;
+    stopMotion(); paint(); drag.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (event.type === 'pointercancel' || reduced || performance.now() - current.time > 90) {setDragging(false);return;}
+    let {vx,vy} = current, previous = performance.now();
+    function glide(now) {
+      const dt = Math.min(32,now - previous); previous = now;
+      const decay = Math.exp(-dt / 110); vx *= decay; vy *= decay;
+      camera.current.x = Math.max(-700,Math.min(700,camera.current.x + vx * dt));
+      camera.current.y = Math.max(-700,Math.min(700,camera.current.y + vy * dt));
+      paint();
+      if (Math.hypot(vx,vy) > .015) frame.current = requestAnimationFrame(glide);
+      else {frame.current = 0;setDragging(false);}
+    }
+    frame.current = requestAnimationFrame(glide);
+  }
   const home = pathname === '/' || pathname === '/index.html';
   const items = [
     {to:'/',label:c.home,icon:'⌂',x:47,y:31},
@@ -30,22 +82,22 @@ export function MapPortal({directory,promotion,questions}) {
     {to:'/promocion/',label:t.navPromotion,icon:'↗',x:68,y:58},
     {to:'/informacion/',label:c.info,icon:'?',x:42,y:76}
   ];
-  function toggleFree() { setFree(!free); setCamera({x:0,y:0,z:1}); }
-  function zoom(delta) {setCamera(v=>({...v,z:Math.max(.7,Math.min(2.5,v.z+delta))}));}
-  return <main id="contenido" className={`map-portal ${home?'map-home':'map-detail'} ${free?'map-free':''}`}>
-    <div className="city-stage" aria-label="Night City" onPointerDown={e=>{if(!free || e.target.closest('a,button'))return;drag.current={x:e.clientX,y:e.clientY,camera};e.currentTarget.setPointerCapture(e.pointerId);}} onPointerMove={e=>{if(!drag.current)return; const d=drag.current;setCamera({...d.camera,x:Math.max(-700,Math.min(700,d.camera.x+e.clientX-d.x)),y:Math.max(-700,Math.min(700,d.camera.y+e.clientY-d.y))});}} onPointerUp={()=>{drag.current=null;}} onPointerCancel={()=>{drag.current=null;}}>
+  function toggleFree() { resetCamera(); setFree(!free); }
+  function zoom(delta) {stopMotion();setDragging(false);camera.current.z = Math.max(.7,Math.min(2.5,camera.current.z + delta));paint();}
+  return <main id="contenido" className={`map-portal ${home?'map-home':'map-detail'} ${free?'map-free':''} ${dragging?'map-dragging':''}`}>
+    <div className="city-stage" aria-label="Night City" onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
       <div className="city-grid" />
-      <div className="city-camera" style={{transform:`translate(${camera.x}px,${camera.y}px) scale(${camera.z})`}}>
+      <div className="city-camera"><div className="city-manual" ref={manualRef}>
         <img className="city-cartography" src={`${import.meta.env.BASE_URL}assets/night-city-streets.webp`} width="2048" height="2327" alt="" draggable="false" fetchPriority="high" />
         <div className="city-points">{items.map(item=><SectionLink key={item.to} className={`city-pin ${pathname===item.to?'is-active':''}`} to={item.to} style={{left:`${item.x}%`,top:`${item.y}%`}} aria-label={item.label} onClick={()=>setFree(false)}><span aria-hidden="true"><MapIcon name={item.icon}/></span><strong>{item.label}</strong></SectionLink>)}</div>
-      </div>
+      </div></div>
       <span className="map-north" aria-hidden="true">N<br/>↑</span>
     </div>
     <div className="map-status"><span className="status-dot" />{c.location}</div>
     {home && !free && <section id="inicio" className="map-intro" aria-labelledby="map-title"><SectionLink className="map-offer" to="/promocion/"><span>{t.offer}</span><b>5 <small>{t.perMonth}</small></b><span aria-hidden="true">↗</span><i>{t.limitedTime}</i></SectionLink><h1 id="map-title">Net<span>Lore</span></h1><p>{c.intro}</p><div className="map-intro-actions"><SectionLink className="button button-pink" to="/servidores/">{t.explore}<span aria-hidden="true">→</span></SectionLink><SectionLink className="button button-outline" to="/promocion/">{t.headerPromote}<span aria-hidden="true">↗</span></SectionLink></div><SectionLink className="map-scroll" to="/servidores/"><span className="mouse-shape" aria-hidden="true"/>{t.navServers}<span aria-hidden="true">⌄</span></SectionLink></section>}
-    {!home && !free && <div className={`map-content ${pathname==='/servidores/'?'map-directory-content':''}`}><SectionLink className="map-back" to="/">← {c.close}</SectionLink>{pathname==='/servidores/'?directory:pathname==='/promocion/'?promotion:<div id="informacion">{questions}</div>}</div>}
-    <nav className="map-dock" aria-label={c.map}>{items.map((item,index)=><SectionLink key={item.to} to={item.to} title={item.label} aria-label={item.label} aria-current={pathname===item.to?'page':undefined} onClick={()=>{setFree(false);setCamera({x:0,y:0,z:1});}}><span className="dock-icon" aria-hidden="true"><MapIcon name={item.icon}/></span><span className="dock-text"><b>{item.label}</b><small>0{index+1} / NETLORE</small></span></SectionLink>)}<button type="button" title={free?c.exit:c.roam} aria-label={free?c.exit:c.roam} aria-pressed={free} onClick={toggleFree}><span className="dock-icon" aria-hidden="true"><MapIcon name="◎"/></span><span className="dock-text">{free?c.exit:c.roam}</span></button></nav>
-    <div className="map-tools"><button type="button" aria-label={c.zoomIn} onClick={()=>zoom(.2)}>+</button><button type="button" aria-label={c.zoomOut} onClick={()=>zoom(-.2)}>−</button><button type="button" aria-label={c.reset} onClick={()=>setCamera({x:0,y:0,z:1})}>⌖</button></div>
+    {!home && !free && <div key={pathname} className={`map-content ${pathname==='/servidores/'?'map-directory-content':''}`}><SectionLink className="map-back" to="/">← {c.close}</SectionLink>{pathname==='/servidores/'?directory:pathname==='/promocion/'?promotion:<div id="informacion">{questions}</div>}</div>}
+    <nav className="map-dock" aria-label={c.map}>{items.map((item,index)=><SectionLink key={item.to} to={item.to} title={item.label} aria-label={item.label} aria-current={pathname===item.to?'page':undefined} onClick={()=>{setFree(false);resetCamera();}}><span className="dock-icon" aria-hidden="true"><MapIcon name={item.icon}/></span><span className="dock-text"><b>{item.label}</b><small>0{index+1} / NETLORE</small></span></SectionLink>)}<button type="button" title={free?c.exit:c.roam} aria-label={free?c.exit:c.roam} aria-pressed={free} onClick={toggleFree}><span className="dock-icon" aria-hidden="true"><MapIcon name="◎"/></span><span className="dock-text">{free?c.exit:c.roam}</span></button></nav>
+    <div className="map-tools"><button type="button" aria-label={c.zoomIn} onClick={()=>zoom(.2)}>+</button><button type="button" aria-label={c.zoomOut} onClick={()=>zoom(-.2)}>−</button><button type="button" aria-label={c.reset} onClick={resetCamera}>⌖</button></div>
     <div className="map-caption">{free&&<p>{c.freeHint}</p>}<a href="https://atlasforge.gg/cyberpunk-2077/map" target="_blank" rel="noopener noreferrer">Night City © CD PROJEKT S.A. · AtlasForge ↗</a></div>
   </main>;
 }
