@@ -8,6 +8,7 @@ import { copyRequestMessage, listingRequestMessage } from './copy-request.mjs';
 import { CookiesPage, PrivacyNotice, PrivacyPage } from './Privacy';
 import { clearNetLorePreferences, NOTICE_KEY, NOTICE_VERSION, readLocal, writeLocal } from './privacy-storage.mjs';
 import { MapPortal } from './MapPortal';
+import CitizenPass from './CitizenPass';
 
 const discordUrl = 'https://discord.gg/YkKv6X6gQB';
 const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
@@ -172,7 +173,7 @@ function Footer({ onOpenNotice, noticeTriggerRef }) {
 }
 
 function Portal() {
-  return <MapPortal directory={<Directory />} promotion={<Promotion />} questions={<Questions />} />;
+  return <MapPortal directory={<Directory />} promotion={<Promotion />} questions={<Questions />} citizen={<CitizenPass />} />;
 }
 
 function NotFound() {
@@ -200,12 +201,12 @@ export default function App() {
     if (success) { setFocusNotice(false); setNoticeVisible(true); }
     return success;
   }
-  const isPortal = ['/', '/index.html', '/servidores/', '/promocion/', '/informacion/'].includes(pathname);
+  const isPortal = ['/', '/index.html', '/servidores/', '/promocion/', '/informacion/', '/pase/'].includes(pathname);
   return <div className={`${noticeVisible ? 'app-with-notice' : ''} ${isPortal ? 'map-application' : ''}`}>
     <NavigationEffects />
     <button className="skip-link" type="button" onClick={() => scrollToSection('contenido', true)}>{t.skip}</button>
     <Header />
-    <Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/admin/" element={<Admin />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes>
+    <Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/pase/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/admin/" element={<Admin />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes>
     <Footer onOpenNotice={openNotice} noticeTriggerRef={noticeTriggerRef} />
     {noticeVisible && <PrivacyNotice onDismiss={dismissNotice} focusOnOpen={focusNotice} returnFocusRef={noticeTriggerRef} />}
   </div>;

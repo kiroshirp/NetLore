@@ -5,9 +5,11 @@ import { SectionLink } from './navigation';
 import { MAP_ROUTES, canScrollInDirection, createMapWheelGesture, wheelDistance } from './map-wheel.mjs';
 import './map.css';
 import './map-skin.css';
+import { citizenCopy } from './citizen-card.mjs';
 
 function MapIcon({name}) {
  const paths = { '⌂': <><path d="m3 10 9-7 9 7M5 9v12h14V9"/><path d="M9 21v-8h6v8"/></>, '▦': <><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M10 4v16M15 4v16M4 15h16"/></>, '↗': <><path d="m4 11 15-7v16L4 13zM8 14l2 7h4l-3-6M21 9h2M21 15h2"/></>, '?': <><path d="M21 11a9 9 0 0 1-9 9H6l-4 2 1-6a9 9 0 1 1 18-5Z"/><path d="M8 9h8M8 13h5"/></>, '◎': <><circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5z"/></> };
+ paths.id = <><rect x="2" y="4" width="20" height="16" rx="3"/><circle cx="8" cy="10" r="2"/><path d="M5 16v-1a3 3 0 0 1 6 0v1m3-7h5m-5 4h5"/></>;
  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
@@ -17,7 +19,7 @@ const copy = {
   fr: {map:'Navigation de la carte',home:'Vue générale',info:'Informations',roam:'Explorer la carte',exit:'Retour au portail',hint:'Choisis un point pour ouvrir une section.',freeHint:'Fais glisser pour déplacer · Utilise les commandes pour zoomer',note:'Les points ouvrent les sections du portail, pas les emplacements des serveurs.',zoomIn:'Agrandir la carte',zoomOut:'Réduire la carte',reset:'Centrer la carte',credit:'Carte : Pottero · Adaptée',close:'Retour à la carte',city:'D’AUTRES VIES. MÊME VILLE.',intro:'Trouve ta prochaine histoire sur les serveurs Cyberpunk d’Open2077.',location:'NIGHT CITY / ANNUAIRE DES COMMUNAUTÉS'}
 };
 
-export function MapPortal({directory,promotion,questions}) {
+export function MapPortal({directory,promotion,questions,citizen}) {
   const { pathname, key: routeKey } = useLocation();
   const navigate = useNavigate();
   const { language,t } = useLanguage();
@@ -121,7 +123,8 @@ export function MapPortal({directory,promotion,questions}) {
     {label:c.home,icon:'⌂',x:47,y:31},
     {label:t.navServers,icon:'▦',x:37,y:47},
     {label:t.navPromotion,icon:'↗',x:68,y:58},
-    {label:c.info,icon:'?',x:42,y:76}
+    {label:c.info,icon:'?',x:42,y:76},
+    {label:citizenCopy[language].title,icon:'id',x:64,y:35}
   ].map((item,index) => ({...item,to:MAP_ROUTES[index]}));
   function toggleFree() { resetCamera(); setFree(!free); }
   function zoom(delta) {stopMotion();setDragging(false);camera.current.z = Math.max(.7,Math.min(2.5,camera.current.z + delta));paint();}
@@ -142,7 +145,7 @@ export function MapPortal({directory,promotion,questions}) {
       <SectionLink className="map-free-note" to="/promocion/">{t.freeListingHint}<span aria-hidden="true">→</span></SectionLink>
       <SectionLink className="map-scroll" to="/servidores/"><span className="mouse-shape" aria-hidden="true"/>{t.navServers}<span aria-hidden="true">⌄</span></SectionLink>
     </section>}
-    {!home && !free && <div key={pathname} className={`map-content ${pathname==='/servidores/'?'map-directory-content':''}`}><SectionLink className="map-back" to="/">← {c.close}</SectionLink>{pathname==='/servidores/'?directory:pathname==='/promocion/'?promotion:<div id="informacion">{questions}</div>}</div>}
+    {!home && !free && <div key={pathname} className={`map-content ${pathname==='/servidores/'?'map-directory-content':pathname==='/pase/'?'map-citizen-content':''}`}><SectionLink className="map-back" to="/">← {c.close}</SectionLink>{pathname==='/servidores/'?directory:pathname==='/promocion/'?promotion:pathname==='/pase/'?citizen:<div id="informacion">{questions}</div>}</div>}
     <nav className="map-dock" aria-label={c.map}>{items.map((item,index)=><SectionLink key={item.to} to={item.to} title={item.label} aria-label={item.label} aria-current={!free&&pathname===item.to?'page':undefined} onClick={()=>{setFree(false);resetCamera();}}><span className="dock-icon" aria-hidden="true"><MapIcon name={item.icon}/></span><span className="dock-text"><b>{item.label}</b><small>0{index+1} / NETLORE</small></span></SectionLink>)}<button type="button" title={free?c.exit:c.roam} aria-label={free?c.exit:c.roam} aria-pressed={free} onClick={toggleFree}><span className="dock-icon" aria-hidden="true"><MapIcon name="◎"/></span><span className="dock-text">{free?c.exit:c.roam}</span></button></nav>
     <div className="map-tools"><button type="button" aria-label={c.zoomIn} onClick={()=>zoom(.2)}>+</button><button type="button" aria-label={c.zoomOut} onClick={()=>zoom(-.2)}>−</button><button type="button" aria-label={c.reset} onClick={resetCamera}>⌖</button></div>
     <div className="map-caption"><p className="map-wheel-hint">{wheelHint}</p>{free&&<p>{c.freeHint}</p>}<a href="https://atlasforge.gg/cyberpunk-2077/map" target="_blank" rel="noopener noreferrer">Night City © CD PROJEKT S.A. · AtlasForge ↗</a></div>

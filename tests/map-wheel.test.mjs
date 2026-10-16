@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { MAP_ROUTES, canScrollInDirection, createMapWheelGesture, wheelDistance } from '../src/map-wheel.mjs';
 
 test('wheel respects menu order, direction and device delta units', () => {
-  assert.deepEqual(MAP_ROUTES, ['/', '/servidores/', '/promocion/', '/informacion/']);
+  assert.deepEqual(MAP_ROUTES, ['/', '/servidores/', '/promocion/', '/informacion/', '/pase/']);
   assert.equal(wheelDistance({deltaY:3,deltaX:0,deltaMode:1},800),48);
   assert.equal(wheelDistance({deltaY:-1,deltaX:0,deltaMode:2},800),-800);
   for (const modifier of ['ctrlKey','metaKey','altKey','shiftKey']) assert.equal(wheelDistance({deltaY:100,deltaX:0,[modifier]:true},800),0);

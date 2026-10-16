@@ -14,7 +14,7 @@ function staticRoutes() {
     },
     async closeBundle() {
       const html = await readFile(resolve(outputDirectory, 'index.html'), 'utf8');
-      for (const route of ['servidores', 'promocion', 'informacion', 'privacidad', 'cookies', 'admin']) {
+      for (const route of ['servidores', 'promocion', 'informacion', 'pase', 'privacidad', 'cookies', 'admin']) {
         const directory = resolve(outputDirectory, route);
         await mkdir(directory, { recursive: true });
         await writeFile(resolve(directory, 'index.html'), html);

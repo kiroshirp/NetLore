@@ -1,4 +1,4 @@
-export const MAP_ROUTES = ['/', '/servidores/', '/promocion/', '/informacion/'];
+export const MAP_ROUTES = ['/', '/servidores/', '/promocion/', '/informacion/', '/pase/'];
 
 export function wheelDistance(event, pageHeight) {
   if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return 0;
