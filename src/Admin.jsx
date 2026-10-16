@@ -12,6 +12,11 @@ const messages={
  fr:{title:'Gérer les serveurs',login:'Accès privé',user:'Identifiant',password:'Mot de passe',signIn:'Se connecter',signOut:'Se déconnecter',new:'Nouvelle fiche',edit:'Modifier la fiche',name:'Nom du serveur',category:'Mode de jeu',url:'Lien Discord ou site web (HTTPS)',description:'Description courte (facultatif)',promoted:'Promotion payante active',published:'Visible dans l’annuaire',save:'Enregistrer la fiche',cancel:'Annuler la modification',list:'Tes serveurs',refresh:'Actualiser la liste',none:'Aucune fiche pour le moment.',editButton:'Modifier',paid:'Sponsorisé',free:'Gratuit',hidden:'Masqué',saved:'Fiche enregistrée. L’annuaire peut désormais afficher les changements.',busy:'Traitement…',public:'Voir l’annuaire',session:'La session expire dans une heure et se ferme à l’actualisation.',not_configured:'Le panneau n’est pas encore connecté.',invalid_credentials:'Identifiant ou mot de passe incorrect.',unauthorized:'La session a expiré. Reconnecte-toi.',rate_limited:'Trop de tentatives. Attends 15 minutes avant de réessayer.',invalid_server:'Vérifie le nom, la catégorie et les champs de la fiche.',invalid_url:'Saisis un lien HTTPS valide sans identifiants.',conflict:'Cette fiche a changé dans une autre session. Actualise la liste et sélectionne-la à nouveau avant d’enregistrer.',server_error:'Impossible de terminer l’opération. Réessaie.'}
 };
 const empty=()=>({name:'',category:'roleplay',url:'',description:'',promoted:false,published:true,details:emptyServerDetails()});
+const dashboardCopy={
+ es:{intro:'El centro de control de tu directorio.',total:'Fichas totales',visible:'Publicadas',hidden:'Ocultas',promoted:'Promocionadas',search:'Buscar por nombre',status:'Estado',all:'Todos',category:'Todas las modalidades',noResults:'No hay fichas que coincidan con los filtros.',loading:'Cargando fichas…',results:'resultados',reset:'Limpiar filtros'},
+ en:{intro:'The control center for your directory.',total:'Total listings',visible:'Published',hidden:'Hidden',promoted:'Promoted',search:'Search by name',status:'Status',all:'All',category:'All game modes',noResults:'No listings match these filters.',loading:'Loading listings…',results:'results',reset:'Clear filters'},
+ fr:{intro:'Le centre de contrôle de ton annuaire.',total:'Total des fiches',visible:'Publiées',hidden:'Masquées',promoted:'Sponsorisées',search:'Rechercher par nom',status:'Statut',all:'Tous',category:'Tous les modes',noResults:'Aucune fiche ne correspond aux filtres.',loading:'Chargement des fiches…',results:'résultats',reset:'Effacer les filtres'}
+};
 const deletionMessages={
  es:{remove:'Eliminar',confirmTitle:'Eliminar servidor',confirmText:'Se eliminará esta ficha de la web y de la base de datos. Esta acción no se puede deshacer.',confirmDelete:'Eliminar definitivamente',keep:'Cancelar',removed:'Servidor eliminado de la web y de la base de datos.'},
  en:{remove:'Delete',confirmTitle:'Delete server',confirmText:'This listing will be deleted from the website and database. This action cannot be undone.',confirmDelete:'Delete permanently',keep:'Cancel',removed:'Server deleted from the website and database.'},
@@ -24,6 +29,9 @@ export default function Admin() {
  const [servers,setServers]=useState([]),[draft,setDraft]=useState(empty),[busy,setBusy]=useState(false),[notice,setNotice]=useState(null),[refresh,setRefresh]=useState(0);
  const nameRef=useRef(null);
  const [deleteTarget,setDeleteTarget]=useState(null);
+ const [query,setQuery]=useState(''),[status,setStatus]=useState('all'),[category,setCategory]=useState('all'),[loading,setLoading]=useState(false),[loaded,setLoaded]=useState(false);
+ const d=dashboardCopy[language];
+ const filteredServers=servers.filter(server=>server.name.toLocaleLowerCase(language).includes(query.trim().toLocaleLowerCase(language))&&(category==='all'||server.category===category)&&(status==='all'||status==='visible'&&server.published||status==='hidden'&&!server.published||status==='promoted'&&server.promoted));
  const dialogRef=useRef(null),cancelRef=useRef(null),deleteTriggerRef=useRef(null),listTitleRef=useRef(null);
  const message=code=>c[code]||c.server_error;
  function fail(error){setNotice({error:true,text:message(error.message)});if(error.message==='unauthorized')setSession(null);}
@@ -66,12 +74,13 @@ export default function Admin() {
  useEffect(()=>{
   if(!session)return;
   const controller=new AbortController();
-  api('/admin/servers',{token:session.token,signal:controller.signal}).then(data=>setServers(data.servers)).catch(error=>{if(error.name!=='AbortError')fail(error);});
+  setLoading(true);
+  api('/admin/servers',{token:session.token,signal:controller.signal}).then(data=>{if(!controller.signal.aborted){setServers(data.servers);setLoaded(true);}}).catch(error=>{if(error.name!=='AbortError')fail(error);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
   return()=>controller.abort();
  },[session,refresh]);
  async function login(event){
   event.preventDefault();setBusy(true);setNotice(null);
-  try{setSession(await api('/admin/login',{method:'POST',body:JSON.stringify({username,password})}));setDraft(empty());}
+  try{const nextSession=await api('/admin/login',{method:'POST',body:JSON.stringify({username,password})});setServers([]);setLoaded(false);setQuery('');setStatus('all');setCategory('all');setSession(nextSession);setDraft(empty());}
   catch(error){fail(error);}finally{setPassword('');setBusy(false);}
  }
  async function logout(){
@@ -90,12 +99,13 @@ export default function Admin() {
  function detailField(key,value){setDraft(current=>({...current,details:{...current.details,[key]:value}}));}
  function edit(server){setDraft({...server,details:{...emptyServerDetails(),...server.details}});setNotice(null);nameRef.current?.focus();nameRef.current?.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
  return <main id="contenido" className="admin-page shell">
-  <div className="admin-heading"><div><p className="eyebrow">NETLORE / ADMIN</p><h1>{c.title}</h1></div><SectionLink className="text-link" to="/servidores/">{c.public} ↗</SectionLink></div>
+  <div className="admin-heading"><div><p className="eyebrow">NETLORE / ADMIN</p><h1>{c.title}</h1><p className="admin-intro">{d.intro}</p></div><SectionLink className="button button-outline" to="/servidores/">{c.public} ↗</SectionLink></div>
   {/^http:\/\/127\.0\.0\.1(?::\d+)?$/.test(API_BASE)&&<p className="admin-notice" role="note">{localPreviewCopy[language]}</p>}
   {!API_BASE&&<p role="alert">{c.not_configured}</p>}
   {notice&&<p className={`admin-notice ${notice.error?'is-error':''}`} role={notice.error?'alert':'status'}>{notice.text}</p>}
   {!session?<form className="admin-login admin-box" onSubmit={login}><h2>{c.login}</h2><label htmlFor="admin-user">{c.user}</label><input id="admin-user" name="username" autoComplete="username" maxLength="128" required value={username} onChange={e=>setUsername(e.target.value)}/><label htmlFor="admin-password">{c.password}</label><input id="admin-password" name="password" type="password" autoComplete="current-password" maxLength="512" required value={password} onChange={e=>setPassword(e.target.value)}/><button className="button button-pink" type="submit" disabled={busy||!API_BASE}>{busy?c.busy:c.signIn}</button></form>:<>
    <div className="admin-session"><p>{c.session}</p><button type="button" className="button button-outline" onClick={logout} disabled={busy}>{c.signOut}</button></div>
+   <dl className="admin-stats">{[[d.total,servers.length],[d.visible,servers.filter(s=>s.published).length],[d.hidden,servers.filter(s=>!s.published).length],[d.promoted,servers.filter(s=>s.promoted).length]].map(([label,count])=><div key={label}><dt>{label}</dt><dd>{loaded?count:'—'}</dd></div>)}</dl>
    <div className="admin-layout"><form className="admin-box" onSubmit={save}>
     <h2>{draft.id?c.edit:c.new}</h2><fieldset disabled={busy}>
      <label htmlFor="server-name">{c.name}</label><input ref={nameRef} id="server-name" name="name" value={draft.name} maxLength="80" required onChange={e=>field('name',e.target.value)}/>
@@ -111,7 +121,7 @@ export default function Admin() {
      <label className="admin-checkbox"><input type="checkbox" checked={draft.promoted} onChange={e=>field('promoted',e.target.checked)}/>{c.promoted}</label><label className="admin-checkbox"><input type="checkbox" checked={draft.published} onChange={e=>field('published',e.target.checked)}/>{c.published}</label>
      <button className="button button-pink" type="submit">{busy?c.busy:c.save}</button>{draft.id&&<button className="admin-cancel" type="button" onClick={()=>{setDraft(empty());setNotice(null);}}>{c.cancel}</button>}
     </fieldset></form>
-    <section className="admin-box" aria-labelledby="admin-list-title"><div className="admin-list-heading"><h2 id="admin-list-title" ref={listTitleRef} tabIndex="-1">{c.list}</h2><button type="button" className="admin-cancel" onClick={()=>setRefresh(v=>v+1)} disabled={busy}>{c.refresh}</button></div>{servers.length===0?<p>{c.none}</p>:<ul className="admin-server-list">{servers.map(server=><li key={server.id}><div><h3>{server.name}</h3><p>{CATEGORY_LABELS[server.category]} · {server.promoted?c.paid:c.free}{!server.published?` · ${c.hidden}`:''}</p></div><div className="admin-row-actions"><button type="button" className="button button-outline" disabled={busy} onClick={()=>edit(server)} aria-label={`${c.editButton}: ${server.name}`}>{c.editButton}</button><button type="button" className="button admin-delete" disabled={busy} onClick={event=>{deleteTriggerRef.current=event.currentTarget;setDeleteTarget(server);}} aria-label={`${c.remove}: ${server.name}`}>{c.remove}</button></div></li>)}</ul>}</section>
+    <section className="admin-box" aria-labelledby="admin-list-title"><div className="admin-list-heading"><h2 id="admin-list-title" ref={listTitleRef} tabIndex="-1">{c.list}</h2><button type="button" className="admin-cancel" onClick={()=>setRefresh(v=>v+1)} disabled={busy||loading}>{c.refresh}</button></div><div className="admin-filters"><label htmlFor="admin-search">{d.search}<input id="admin-search" type="search" value={query} onChange={e=>setQuery(e.target.value)}/></label><label htmlFor="admin-filter-category">{c.category}<select id="admin-filter-category" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">{d.category}</option>{CATEGORIES.map(value=><option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}</select></label><label htmlFor="admin-filter-status">{d.status}<select id="admin-filter-status" value={status} onChange={e=>setStatus(e.target.value)}>{["all","visible","hidden","promoted"].map(value=><option key={value} value={value}>{d[value]}</option>)}</select></label></div><p className="admin-results" role="status">{loading?d.loading:loaded?filteredServers.length+" "+d.results:"—"}</p>{(query||category!=="all"||status!=="all")&&<button type="button" className="admin-cancel" onClick={()=>{setQuery("");setCategory("all");setStatus("all");}}>{d.reset}</button>}{!loaded?null:filteredServers.length===0?<p className="admin-empty">{servers.length===0?c.none:d.noResults}</p>:<ul className="admin-server-list">{filteredServers.map(server=><li key={server.id}><div><h3>{server.name}</h3><p>{CATEGORY_LABELS[server.category]} · {server.promoted?c.paid:c.free}{!server.published?` · ${c.hidden}`:''}</p></div><div className="admin-row-actions"><button type="button" className="button button-outline" disabled={busy} onClick={()=>edit(server)} aria-label={`${c.editButton}: ${server.name}`}>{c.editButton}</button><button type="button" className="button admin-delete" disabled={busy} onClick={event=>{deleteTriggerRef.current=event.currentTarget;setDeleteTarget(server);}} aria-label={`${c.remove}: ${server.name}`}>{c.remove}</button></div></li>)}</ul>}</section>
    </div>
   </>}
   <dialog ref={dialogRef} className="admin-delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description" onCancel={event=>{event.preventDefault();cancelDeletion();}}>

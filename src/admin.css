@@ -1,6 +1,24 @@
 .admin-page {padding-block:40px 60px;max-width:1150px;}
 .admin-heading {display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-bottom:28px;}
 .admin-heading h1 {font:700 clamp(30px,4vw,44px)/1.2 'Segoe UI',sans-serif;margin-top:12px;letter-spacing:-.03em;}
+.admin-heading {padding:30px;border:1px solid #41516a;border-radius:20px;background:radial-gradient(ellipse at top right,#ff36b41a,transparent 65%),repeating-linear-gradient(90deg,transparent 0 39px,#91a8cd06 39px 40px),linear-gradient(145deg,#1b2a40,#101a2a);box-shadow:inset 0 1px 0 #ffffff26,0 6px 0 #030711;}
+.admin-heading .eyebrow {color:#ff9dd9;}
+.admin-intro {color:var(--muted);font-size:14px;line-height:1.7;margin-top:14px;}
+.admin-page .admin-box {background:linear-gradient(145deg,#19273c,#101a2a 70%);border-color:#41516a;box-shadow:inset 0 1px 0 #ffffff20,0 5px 0 #030711,0 14px 24px #03071155;}
+.admin-page .button {border-radius:10px;box-shadow:inset 0 1px 0 #ffffff20,inset 0 -3px 0 #0003,0 3px 0 #030711;}
+.admin-page .button-pink {background:linear-gradient(150deg,#ff93d8,#ed48b2 75%);}
+.admin-page .button-pink:hover {background:#ff93d8;}
+.admin-stats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0 0 28px;}
+.admin-stats>div {border:1px solid #41516a;border-radius:14px;padding:20px;background:linear-gradient(145deg,#1b2a40,#101a2a);box-shadow:inset 0 1px 0 #ffffff20,0 4px 0 #030711;}
+.admin-stats dt {color:var(--muted);font-size:12px;}
+.admin-stats dd {margin:10px 0 0;font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;color:#ff9dd9;}
+.admin-filters {display:grid;grid-template-columns:1fr 1fr;gap:0 12px;}
+.admin-filters>label:first-child {grid-column:1/-1;}
+.admin-filters input,.admin-filters select {margin-top:8px;}
+.admin-results {padding-bottom:16px;}
+.admin-empty {padding-block:24px;border-top:1px solid var(--line);}
+@media(max-width:950px) {.admin-layout{grid-template-columns:1fr!important;}.admin-stats{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:450px) {.admin-heading{padding:22px;}.admin-filters{grid-template-columns:1fr;}.admin-stats{gap:10px;}.admin-stats>div{padding:16px;}}
 .admin-page h2 {font:650 23px/1.3 'Segoe UI',sans-serif;margin-bottom:22px;}
 .admin-box {padding:26px;border:1px solid var(--line);border-radius:16px;background:var(--panel);min-width:0;}
 .admin-login {max-width:420px;margin:35px auto;}
