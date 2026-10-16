@@ -23,4 +23,14 @@
 .admin-server-list h3 {font-size:17px;overflow-wrap:anywhere;}
 .admin-server-list p {color:var(--muted);font-size:12px;margin-top:8px;}
 .admin-server-list .button {font-size:12px;min-height:40px;flex-shrink:0;}
+.admin-row-actions {display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;}
+.admin-page .admin-delete {border-color:#b36b7f;color:#ffd4df;background:#3a1f2d;}
+.admin-page .admin-delete:hover {background:#52283b;border-color:#ef9bb1;}
+.admin-delete-dialog {width:min(460px,calc(100% - 32px));max-height:calc(100svh - 40px);overflow-y:auto;padding:28px;border:1px solid #66738b;border-radius:18px;background:#101b2c;color:#edf0f6;box-shadow:0 24px 90px #0009;}
+.admin-delete-dialog::backdrop {background:#030812bb;}
+.admin-delete-dialog h2 {margin-bottom:16px;}
+.admin-delete-dialog p {font-size:14px;line-height:1.7;color:#c1ccdd;}
+.admin-delete-dialog .admin-delete-name {font-size:19px;font-weight:650;color:#fff;overflow-wrap:anywhere;margin-bottom:12px;}
+.admin-dialog-actions {display:flex;justify-content:flex-end;flex-wrap:wrap;gap:12px;margin-top:24px;}
+@media(max-width:600px) {.admin-server-list li{align-items:flex-start;flex-wrap:wrap;}.admin-row-actions{width:100%;justify-content:flex-start;}.admin-delete-dialog{padding:22px;}.admin-dialog-actions{justify-content:flex-start;}}
 @media(max-width:750px) {.admin-layout{grid-template-columns:1fr;}.admin-page{width:calc(100% - 32px);padding-top:24px;}.admin-box{padding:20px;}.admin-session{align-items:flex-start;flex-direction:column;}}

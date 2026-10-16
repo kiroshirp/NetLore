@@ -30,7 +30,7 @@ export default {
   if(origin&&allowed.includes(origin)) headers['Access-Control-Allow-Origin']=origin;
   const reply=(data,status=200)=>new Response(JSON.stringify(data),{status,headers});
   if(origin&&!allowed.includes(origin))return reply({error:'origin_denied'},403);
-  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}});
+  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...headers,'Access-Control-Allow-Methods':'GET, POST, PUT, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Max-Age':'600'}});
   const path=new URL(request.url).pathname.replace(/\/+$/,'')||'/';
   const now=Math.floor(Date.now()/1000);
   try {
@@ -70,6 +70,12 @@ export default {
     const row=await env.DB.prepare('INSERT INTO servers(id,name,description,category,url,promoted,published,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING *').bind(id,value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),now,now).first();return reply({server:adminServer(row)},201);
    }
    const match=path.match(/^\/admin\/servers\/([a-f0-9-]{36})$/);
+   if(match&&request.method==='DELETE') {
+    const input=await body(request);
+    if(!Number.isSafeInteger(input.revision)||input.revision<1)return reply({error:'invalid_server'},400);
+    const deleted=await env.DB.prepare('DELETE FROM servers WHERE id=? AND revision=? RETURNING id').bind(match[1],input.revision).first();
+    return deleted?reply({deletedId:deleted.id}):reply({error:'conflict'},409);
+   }
    if(match&&request.method==='PUT') {
     const input=await body(request),value=validateServer(input);
     if(!Number.isSafeInteger(input.revision)||input.revision<1)return reply({error:'invalid_server'},400);

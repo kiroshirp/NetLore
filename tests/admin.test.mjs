@@ -52,6 +52,32 @@ test('changed password and expired sessions revoke access',async()=>{
  await DB.prepare('UPDATE sessions SET expires_at=0').run();
  assert.equal((await worker.fetch(request('/admin/servers',{token}),env)).status,401);DB.close();
 });
+test('deletion requires authentication and current revision, and physically removes only the selected row',async()=>{
+ const DB=database(),env={...envBase,DB},token=await login(env);
+ const create=async(name,published)=>{
+  const response=await worker.fetch(request('/admin/servers',{method:'POST',body:{...fixture,name,published},token}),env);
+  return (await response.json()).server;
+ };
+ const target=await create('Delete this isolated fixture',true),keep=await create('Keep this isolated fixture',true);
+ const path='/admin/servers/'+target.id;
+ assert.equal((await worker.fetch(request(path,{method:'DELETE',body:{revision:target.revision}}),env)).status,401);
+ assert.equal((await worker.fetch(request(path,{method:'DELETE',body:{revision:target.revision},token,origin:'https://evil.invalid'}),env)).status,403);
+ assert.equal((await worker.fetch(request(path,{method:'DELETE',body:{},token}),env)).status,400);
+ assert.equal((await worker.fetch(request(path,{method:'DELETE',body:{revision:target.revision+1},token}),env)).status,409);
+ assert.ok(await DB.prepare('SELECT id FROM servers WHERE id=?').bind(target.id).first());
+ const response=await worker.fetch(request(path,{method:'DELETE',body:{revision:target.revision},token}),env);
+ assert.equal(response.status,200);assert.deepEqual(await response.json(),{deletedId:target.id});
+ assert.equal(await DB.prepare('SELECT * FROM servers WHERE id=?').bind(target.id).first(),null);
+ const publicRows=(await (await worker.fetch(request('/servers'),env)).json()).servers;
+ const adminRows=(await (await worker.fetch(request('/admin/servers',{token}),env)).json()).servers;
+ assert.deepEqual(publicRows.map(row=>row.id),[keep.id]);assert.deepEqual(adminRows.map(row=>row.id),[keep.id]);
+ const hidden=await create('Hidden isolated fixture',false);
+ assert.equal((await worker.fetch(request('/admin/servers/'+hidden.id,{method:'DELETE',body:{revision:hidden.revision},token}),env)).status,200);
+ assert.equal(await DB.prepare('SELECT id FROM servers WHERE id=?').bind(hidden.id).first(),null);
+ const preflight=await worker.fetch(request(path,{method:'OPTIONS'}),env);
+ assert.ok(preflight.headers.get('Access-Control-Allow-Methods').includes('DELETE'));
+ DB.close();
+});
 test('invalid credentials have a generic error and repeated attempts are limited',async()=>{
  const DB=database(),env={...envBase,DB};
  for(let i=0;i<10;i++){const response=await worker.fetch(request('/admin/login',{method:'POST',body:{username:'wrong',password:'wrong'}}),env);assert.equal(response.status,401);assert.deepEqual(await response.json(),{error:'invalid_credentials'});}

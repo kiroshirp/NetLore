@@ -11,18 +11,52 @@ const messages={
  fr:{title:'Gérer les serveurs',login:'Accès privé',user:'Identifiant',password:'Mot de passe',signIn:'Se connecter',signOut:'Se déconnecter',new:'Nouvelle fiche',edit:'Modifier la fiche',name:'Nom du serveur',category:'Mode de jeu',url:'Lien Discord ou site web (HTTPS)',description:'Description courte (facultatif)',promoted:'Promotion payante active',published:'Visible dans l’annuaire',save:'Enregistrer la fiche',cancel:'Annuler la modification',list:'Tes serveurs',refresh:'Actualiser la liste',none:'Aucune fiche pour le moment.',editButton:'Modifier',paid:'Sponsorisé',free:'Gratuit',hidden:'Masqué',saved:'Fiche enregistrée. L’annuaire peut désormais afficher les changements.',busy:'Traitement…',public:'Voir l’annuaire',session:'La session expire dans une heure et se ferme à l’actualisation.',not_configured:'Le panneau n’est pas encore connecté.',invalid_credentials:'Identifiant ou mot de passe incorrect.',unauthorized:'La session a expiré. Reconnecte-toi.',rate_limited:'Trop de tentatives. Attends 15 minutes avant de réessayer.',invalid_server:'Vérifie le nom, la catégorie et les champs de la fiche.',invalid_url:'Saisis un lien HTTPS valide sans identifiants.',conflict:'Cette fiche a changé dans une autre session. Actualise la liste et sélectionne-la à nouveau avant d’enregistrer.',server_error:'Impossible de terminer l’opération. Réessaie.'}
 };
 const empty=()=>({name:'',category:'roleplay',url:'',description:'',promoted:false,published:true});
+const deletionMessages={
+ es:{remove:'Eliminar',confirmTitle:'Eliminar servidor',confirmText:'Se eliminará esta ficha de la web y de la base de datos. Esta acción no se puede deshacer.',confirmDelete:'Eliminar definitivamente',keep:'Cancelar',removed:'Servidor eliminado de la web y de la base de datos.'},
+ en:{remove:'Delete',confirmTitle:'Delete server',confirmText:'This listing will be deleted from the website and database. This action cannot be undone.',confirmDelete:'Delete permanently',keep:'Cancel',removed:'Server deleted from the website and database.'},
+ fr:{remove:'Supprimer',confirmTitle:'Supprimer le serveur',confirmText:'Cette fiche sera supprimée du site et de la base de données. Cette action est irréversible.',confirmDelete:'Supprimer définitivement',keep:'Annuler',removed:'Serveur supprimé du site et de la base de données.'}
+};
 
 export default function Admin() {
- const {language}=useLanguage(),c=messages[language];
+ const {language}=useLanguage(),c={...messages[language],...deletionMessages[language]};
  const [session,setSession]=useState(null),[username,setUsername]=useState(''),[password,setPassword]=useState('');
  const [servers,setServers]=useState([]),[draft,setDraft]=useState(empty),[busy,setBusy]=useState(false),[notice,setNotice]=useState(null),[refresh,setRefresh]=useState(0);
  const nameRef=useRef(null);
+ const [deleteTarget,setDeleteTarget]=useState(null);
+ const dialogRef=useRef(null),cancelRef=useRef(null),deleteTriggerRef=useRef(null),listTitleRef=useRef(null);
  const message=code=>c[code]||c.server_error;
  function fail(error){setNotice({error:true,text:message(error.message)});if(error.message==='unauthorized')setSession(null);}
  useEffect(()=>{
   const tag=document.createElement('meta');tag.name='robots';tag.content='noindex, nofollow';document.head.append(tag);
   return()=>tag.remove();
  },[]);
+ useEffect(()=>{
+  const dialog=dialogRef.current;
+  if(deleteTarget&&session){if(!dialog.open)dialog.showModal();cancelRef.current?.focus();}
+  else {if(dialog?.open)dialog.close();if(!session&&deleteTarget)setDeleteTarget(null);}
+ },[deleteTarget,session]);
+ function cancelDeletion(){
+  if(busy)return;
+  setDeleteTarget(null);
+  dialogRef.current?.close();
+  deleteTriggerRef.current?.focus({preventScroll:true});
+ }
+ async function removeServer(){
+  if(!deleteTarget||!session||busy)return;
+  const target=deleteTarget;
+  setBusy(true);setNotice(null);
+  try{
+   await api(`/admin/servers/${target.id}`,{method:'DELETE',body:JSON.stringify({revision:target.revision}),token:session.token});
+   setServers(current=>current.filter(server=>server.id!==target.id));
+   if(draft.id===target.id)setDraft(empty());
+   setNotice({error:false,text:c.removed});
+   setDeleteTarget(null);
+   dialogRef.current?.close();
+   listTitleRef.current?.focus({preventScroll:true});
+   setRefresh(value=>value+1);
+  }catch(error){setDeleteTarget(null);dialogRef.current?.close();deleteTriggerRef.current?.focus({preventScroll:true});fail(error);}
+  finally{setBusy(false);}
+ }
  useEffect(()=>{
   if(!session)return;
   const timeout=setTimeout(()=>{setSession(null);setNotice({error:true,text:c.unauthorized});},Math.max(0,session.expiresAt*1000-Date.now()));
@@ -60,8 +94,11 @@ export default function Admin() {
   {!session?<form className="admin-login admin-box" onSubmit={login}><h2>{c.login}</h2><label htmlFor="admin-user">{c.user}</label><input id="admin-user" name="username" autoComplete="username" maxLength="128" required value={username} onChange={e=>setUsername(e.target.value)}/><label htmlFor="admin-password">{c.password}</label><input id="admin-password" name="password" type="password" autoComplete="current-password" maxLength="512" required value={password} onChange={e=>setPassword(e.target.value)}/><button className="button button-pink" type="submit" disabled={busy||!API_BASE}>{busy?c.busy:c.signIn}</button></form>:<>
    <div className="admin-session"><p>{c.session}</p><button type="button" className="button button-outline" onClick={logout} disabled={busy}>{c.signOut}</button></div>
    <div className="admin-layout"><form className="admin-box" onSubmit={save}><h2>{draft.id?c.edit:c.new}</h2><fieldset disabled={busy}><label htmlFor="server-name">{c.name}</label><input ref={nameRef} id="server-name" name="name" value={draft.name} maxLength="80" required onChange={e=>field('name',e.target.value)}/><label htmlFor="server-category">{c.category}</label><select id="server-category" value={draft.category} onChange={e=>field('category',e.target.value)}>{CATEGORIES.map(category=><option key={category} value={category}>{CATEGORY_LABELS[category]}</option>)}</select><label htmlFor="server-url">{c.url}</label><input id="server-url" name="url" type="url" pattern="https://.*" value={draft.url} required maxLength="2048" onChange={e=>field('url',e.target.value)}/><label htmlFor="server-description">{c.description}</label><textarea id="server-description" name="description" value={draft.description} maxLength="300" rows="3" onChange={e=>field('description',e.target.value)}/><label className="admin-checkbox"><input type="checkbox" checked={draft.promoted} onChange={e=>field('promoted',e.target.checked)}/>{c.promoted}</label><label className="admin-checkbox"><input type="checkbox" checked={draft.published} onChange={e=>field('published',e.target.checked)}/>{c.published}</label><button className="button button-pink" type="submit">{busy?c.busy:c.save}</button>{draft.id&&<button className="admin-cancel" type="button" onClick={()=>{setDraft(empty());setNotice(null);}}>{c.cancel}</button>}</fieldset></form>
-    <section className="admin-box" aria-labelledby="admin-list-title"><div className="admin-list-heading"><h2 id="admin-list-title">{c.list}</h2><button type="button" className="admin-cancel" onClick={()=>setRefresh(v=>v+1)} disabled={busy}>{c.refresh}</button></div>{servers.length===0?<p>{c.none}</p>:<ul className="admin-server-list">{servers.map(server=><li key={server.id}><div><h3>{server.name}</h3><p>{CATEGORY_LABELS[server.category]} · {server.promoted?c.paid:c.free}{!server.published?` · ${c.hidden}`:''}</p></div><button type="button" className="button button-outline" disabled={busy} onClick={()=>edit(server)} aria-label={`${c.editButton}: ${server.name}`}>{c.editButton}</button></li>)}</ul>}</section>
+    <section className="admin-box" aria-labelledby="admin-list-title"><div className="admin-list-heading"><h2 id="admin-list-title" ref={listTitleRef} tabIndex="-1">{c.list}</h2><button type="button" className="admin-cancel" onClick={()=>setRefresh(v=>v+1)} disabled={busy}>{c.refresh}</button></div>{servers.length===0?<p>{c.none}</p>:<ul className="admin-server-list">{servers.map(server=><li key={server.id}><div><h3>{server.name}</h3><p>{CATEGORY_LABELS[server.category]} · {server.promoted?c.paid:c.free}{!server.published?` · ${c.hidden}`:''}</p></div><div className="admin-row-actions"><button type="button" className="button button-outline" disabled={busy} onClick={()=>edit(server)} aria-label={`${c.editButton}: ${server.name}`}>{c.editButton}</button><button type="button" className="button admin-delete" disabled={busy} onClick={event=>{deleteTriggerRef.current=event.currentTarget;setDeleteTarget(server);}} aria-label={`${c.remove}: ${server.name}`}>{c.remove}</button></div></li>)}</ul>}</section>
    </div>
   </>}
+  <dialog ref={dialogRef} className="admin-delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description" onCancel={event=>{event.preventDefault();cancelDeletion();}}>
+   <h2 id="delete-title">{c.confirmTitle}</h2><p className="admin-delete-name">{deleteTarget?.name}</p><p id="delete-description">{c.confirmText}</p><div className="admin-dialog-actions"><button ref={cancelRef} type="button" className="button button-outline" disabled={busy} onClick={cancelDeletion}>{c.keep}</button><button type="button" className="button admin-delete" disabled={busy||!session} onClick={removeServer}>{busy?c.busy:c.confirmDelete}</button></div>
+  </dialog>
  </main>;
 }
