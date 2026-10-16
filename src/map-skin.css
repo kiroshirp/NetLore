@@ -48,6 +48,9 @@
 .dock-text small { display:block; margin-top:5px; font-size:10px; color:#aeb8c9; }
 .map-dock a[aria-current='page'] { background:linear-gradient(140deg,#ffabe1,#ed59b8); color:#210e20; border-color:#512b48; box-shadow:inset 0 1px 0 #ffffff80,inset 0 -4px 0 #0003,0 4px 0 #02050b; }
 .map-dock a[aria-current='page'] small { color:#552742; }
+.map-dock button[aria-pressed='true'] { background:linear-gradient(140deg,#ffabe1,#ed59b8); color:#210e20; border-color:#512b48; }
+.map-wheel-hint { color:#b3bfd1; font:11px/1.5 'Segoe UI',sans-serif; }
+@media(hover:none) { .map-wheel-hint { display:none; } }
 .map-dock:hover,.map-dock:focus-within { width:280px; padding:16px; background:#111c2df5; border:1px solid #3d485a; border-radius:22px; box-shadow:inset 0 1px 0 #ffffff17,0 20px 50px #0007; }
 .map-dock:hover .dock-text,.map-dock:focus-within .dock-text { display:block; }
 .map-dock:hover a,.map-dock:hover button,.map-dock:focus-within a,.map-dock:focus-within button { width:100%; height:65px; }
@@ -128,4 +131,4 @@
  .map-dock .dock-text { display:block; opacity:0; max-width:0; overflow:hidden; transition:opacity .16s ease,max-width .24s ease; }
  .map-dock:hover .dock-text,.map-dock:focus-within .dock-text { opacity:1; max-width:200px; }
 }
-@media(prefers-reduced-motion:reduce) { .map-portal .city-camera,.city-manual,.map-dock,.map-dock a,.map-dock button {transition:none;} .map-content,.map-intro {animation:none;} }
+@media(prefers-reduced-motion:reduce) { .map-portal .city-camera,.map-portal.map-free .city-camera,.city-manual,.map-dock,.map-dock a,.map-dock button {transition:none;} .map-content,.map-intro {animation:none;} }

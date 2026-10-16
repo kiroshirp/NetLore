@@ -1,7 +1,8 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from './i18n';
 import { SectionLink } from './navigation';
+import { MAP_ROUTES, canScrollInDirection, createMapWheelGesture, wheelDistance } from './map-wheel.mjs';
 import './map.css';
 import './map-skin.css';
 
@@ -18,9 +19,18 @@ const copy = {
 
 export function MapPortal({directory,promotion,questions}) {
   const { pathname, key: routeKey } = useLocation();
+  const navigate = useNavigate();
   const { language,t } = useLanguage();
   const c = copy[language];
   const [free,setFree] = useState(false);
+  const portalRef = useRef(null);
+  const wheelGesture = useRef(null);
+  if (!wheelGesture.current) wheelGesture.current = createMapWheelGesture();
+  const wheelHint = {
+    es: 'Rueda para recorrer · Menú para elegir',
+    en: 'Scroll to explore · Choose from the menu',
+    fr: 'Défile pour explorer · Choisis dans le menu',
+  }[language];
   const camera = useRef({x:0,y:0,z:1});
   const manualRef = useRef(null);
   const frame = useRef(0);
@@ -37,6 +47,37 @@ export function MapPortal({directory,promotion,questions}) {
     resetCamera();
     return stopMotion;
   }, [pathname, routeKey]);
+  useLayoutEffect(() => {
+    const portal = portalRef.current;
+    wheelGesture.current.settle(performance.now());
+    function onWheel(event) {
+      const target = event.target;
+      if (!(target instanceof Element) || event.defaultPrevented) return;
+      const delta = wheelDistance(event, portal.clientHeight);
+      if (!delta) return;
+      // Preserve native controls, browser zoom and any open modal interaction.
+      if (target.closest('input,textarea,select,[contenteditable="true"],[role="dialog"]') || document.querySelector('dialog[open],[role="dialog"][aria-modal="true"]')) return;
+      const direction = Math.sign(delta);
+      let scrollable = false;
+      for (let node = target; node && node !== portal; node = node.parentElement) {
+        if (/^(auto|scroll)$/.test(getComputedStyle(node).overflowY) && canScrollInDirection(node, direction)) { scrollable = true; break; }
+      }
+      const index = free ? MAP_ROUTES.length : MAP_ROUTES.indexOf(pathname === '/index.html' ? '/' : pathname);
+      const next = index + direction;
+      const action = wheelGesture.current.step({delta, now:performance.now(), scrollable, available:index >= 0 && next >= 0 && next <= MAP_ROUTES.length});
+      if (action === 'native') return;
+      event.preventDefault();
+      if (action === 'hold') return;
+      resetCamera();
+      if (next === MAP_ROUTES.length) setFree(true);
+      else {
+        setFree(false);
+        navigate(MAP_ROUTES[next], {state:{focusSection:true}});
+      }
+    }
+    portal.addEventListener('wheel', onWheel, {passive:false});
+    return () => portal.removeEventListener('wheel', onWheel);
+  }, [pathname, routeKey, free, navigate]);
   function pointerDown(event) {
     if (!free || !event.isPrimary || event.button !== 0 || event.target.closest('a,button')) return;
     stopMotion();
@@ -77,14 +118,14 @@ export function MapPortal({directory,promotion,questions}) {
   }
   const home = pathname === '/' || pathname === '/index.html';
   const items = [
-    {to:'/',label:c.home,icon:'⌂',x:47,y:31},
-    {to:'/servidores/',label:t.navServers,icon:'▦',x:37,y:47},
-    {to:'/promocion/',label:t.navPromotion,icon:'↗',x:68,y:58},
-    {to:'/informacion/',label:c.info,icon:'?',x:42,y:76}
-  ];
+    {label:c.home,icon:'⌂',x:47,y:31},
+    {label:t.navServers,icon:'▦',x:37,y:47},
+    {label:t.navPromotion,icon:'↗',x:68,y:58},
+    {label:c.info,icon:'?',x:42,y:76}
+  ].map((item,index) => ({...item,to:MAP_ROUTES[index]}));
   function toggleFree() { resetCamera(); setFree(!free); }
   function zoom(delta) {stopMotion();setDragging(false);camera.current.z = Math.max(.7,Math.min(2.5,camera.current.z + delta));paint();}
-  return <main id="contenido" className={`map-portal ${home?'map-home':'map-detail'} ${free?'map-free':''} ${dragging?'map-dragging':''}`}>
+  return <main id="contenido" ref={portalRef} className={`map-portal ${home?'map-home':'map-detail'} ${free?'map-free':''} ${dragging?'map-dragging':''}`}>
     <div className="city-stage" aria-label="Night City" onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
       <div className="city-grid" />
       <div className="city-camera"><div className="city-manual" ref={manualRef}>
@@ -102,8 +143,8 @@ export function MapPortal({directory,promotion,questions}) {
       <SectionLink className="map-scroll" to="/servidores/"><span className="mouse-shape" aria-hidden="true"/>{t.navServers}<span aria-hidden="true">⌄</span></SectionLink>
     </section>}
     {!home && !free && <div key={pathname} className={`map-content ${pathname==='/servidores/'?'map-directory-content':''}`}><SectionLink className="map-back" to="/">← {c.close}</SectionLink>{pathname==='/servidores/'?directory:pathname==='/promocion/'?promotion:<div id="informacion">{questions}</div>}</div>}
-    <nav className="map-dock" aria-label={c.map}>{items.map((item,index)=><SectionLink key={item.to} to={item.to} title={item.label} aria-label={item.label} aria-current={pathname===item.to?'page':undefined} onClick={()=>{setFree(false);resetCamera();}}><span className="dock-icon" aria-hidden="true"><MapIcon name={item.icon}/></span><span className="dock-text"><b>{item.label}</b><small>0{index+1} / NETLORE</small></span></SectionLink>)}<button type="button" title={free?c.exit:c.roam} aria-label={free?c.exit:c.roam} aria-pressed={free} onClick={toggleFree}><span className="dock-icon" aria-hidden="true"><MapIcon name="◎"/></span><span className="dock-text">{free?c.exit:c.roam}</span></button></nav>
+    <nav className="map-dock" aria-label={c.map}>{items.map((item,index)=><SectionLink key={item.to} to={item.to} title={item.label} aria-label={item.label} aria-current={!free&&pathname===item.to?'page':undefined} onClick={()=>{setFree(false);resetCamera();}}><span className="dock-icon" aria-hidden="true"><MapIcon name={item.icon}/></span><span className="dock-text"><b>{item.label}</b><small>0{index+1} / NETLORE</small></span></SectionLink>)}<button type="button" title={free?c.exit:c.roam} aria-label={free?c.exit:c.roam} aria-pressed={free} onClick={toggleFree}><span className="dock-icon" aria-hidden="true"><MapIcon name="◎"/></span><span className="dock-text">{free?c.exit:c.roam}</span></button></nav>
     <div className="map-tools"><button type="button" aria-label={c.zoomIn} onClick={()=>zoom(.2)}>+</button><button type="button" aria-label={c.zoomOut} onClick={()=>zoom(-.2)}>−</button><button type="button" aria-label={c.reset} onClick={resetCamera}>⌖</button></div>
-    <div className="map-caption">{free&&<p>{c.freeHint}</p>}<a href="https://atlasforge.gg/cyberpunk-2077/map" target="_blank" rel="noopener noreferrer">Night City © CD PROJEKT S.A. · AtlasForge ↗</a></div>
+    <div className="map-caption"><p className="map-wheel-hint">{wheelHint}</p>{free&&<p>{c.freeHint}</p>}<a href="https://atlasforge.gg/cyberpunk-2077/map" target="_blank" rel="noopener noreferrer">Night City © CD PROJEKT S.A. · AtlasForge ↗</a></div>
   </main>;
 }
