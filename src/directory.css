@@ -12,6 +12,10 @@
 .directory-search button {flex-shrink:0;width:32px;height:36px;border:0;border-radius:5px;background:none;color:#d0d9e7;font-size:24px;}
 .directory-count {color:#b3bfd1;font-size:12px;white-space:nowrap;}
 .directory-count strong {color:#f1f2f3;font-size:20px;margin-right:5px;font-variant-numeric:tabular-nums;}
+.directory-listing-callout {display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:15px 0 0;padding:11px 14px;border:1px solid #45516a;border-radius:10px;background:#17253b;}
+.directory-listing-callout p {font-size:12px;line-height:1.6;color:#d0d9e8;flex:1;min-width:190px;}
+.directory-listing-callout a {display:inline-flex;align-items:center;gap:10px;color:#ffb1df;font-size:12px;font-weight:600;min-height:30px;}
+.directory-listing-callout a:hover {text-decoration:underline;text-underline-offset:4px;}
 .category-filters {display:flex;flex-wrap:wrap;gap:7px;margin:20px 0 20px;padding-bottom:18px;border-bottom:1px solid #344157;}
 .category-filters button {display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid #3b475c;background:linear-gradient(145deg,#1b293d,#111b2c);color:#c6cfdd;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-radius:8px;min-height:43px;box-shadow:inset 0 1px 0 #ffffff0c,0 2px 0 #030711;transition:background .15s,border-color .15s,transform .15s;}
 .category-filters button:hover {border-color:#8493aa;}

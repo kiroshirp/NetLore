@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { copyRequestMessage } from '../src/copy-request.mjs';
+import { copyRequestMessage, listingRequestMessage } from '../src/copy-request.mjs';
 
 const messages = JSON.parse(await readFile(new URL('../src/locales/messages.json', import.meta.url), 'utf8'));
 const app = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
@@ -26,6 +26,27 @@ test('request messages preserve the real offer and brand in every language', () 
     assert.match(translation.requestMessage, /5/);
     assert.match(translation.requestMessage, /€/);
     assert.match(translation.openDiscord, /KiroshiRP/);
+  }
+});
+
+test('free requests are the default and never request a paid promotion',()=>{
+  for(const translation of Object.values(messages)) {
+    assert.equal(listingRequestMessage(translation),translation.freeRequestMessage);
+    assert.equal(listingRequestMessage(translation,'free'),translation.freeRequestMessage);
+    assert.match(translation.freeRequestMessage,/NetLore/);
+    assert.match(translation.freeRequestMessage,/Open2077/);
+    assert.doesNotMatch(translation.freeRequestMessage,/5|€/);
+    assert.equal(listingRequestMessage(translation,'paid'),translation.requestMessage);
+    assert.notEqual(translation.freeRequestMessage,translation.requestMessage);
+  }
+  assert.throws(()=>listingRequestMessage(messages.en,'unknown'));
+});
+
+test('free and priority options are explicit in every language without promising server images',()=>{
+  for(const translation of Object.values(messages)) {
+    for(const key of ['freeListingTitle','freeListingDescription','paidListingTitle','paidListingDescription','freeListingHint','directoryListingNote','listingRequestLink'])assert.ok(translation[key]?.trim(),key);
+    assert.match(translation.faq3Answer,/5/);
+    assert.doesNotMatch(translation.inclusionName,/imagen|image/i);
   }
 });
 

@@ -4,7 +4,7 @@ import { useLanguage } from './i18n';
 import { NavigationEffects, SectionLink, scrollToSection } from './navigation';
 import ServerDirectory from './Directory';
 import Admin from './Admin';
-import { copyRequestMessage } from './copy-request.mjs';
+import { copyRequestMessage, listingRequestMessage } from './copy-request.mjs';
 import { CookiesPage, PrivacyNotice, PrivacyPage } from './Privacy';
 import { clearNetLorePreferences, NOTICE_KEY, NOTICE_VERSION, readLocal, writeLocal } from './privacy-storage.mjs';
 import { MapPortal } from './MapPortal';
@@ -80,21 +80,22 @@ function ServerCard({ server }) {
   </article>;
 }
 
-function RequestPromotion() {
+function RequestPromotion({listingType}) {
   const { language, t } = useLanguage();
   const messageRef = useRef(null);
   const [copyResult, setCopyResult] = useState(null);
-  const status = copyResult?.language === language ? copyResult.status : 'idle';
+  const message = listingRequestMessage(t,listingType);
+  const status = copyResult?.language === language && copyResult?.listingType === listingType ? copyResult.status : 'idle';
 
   async function copyMessage() {
-    const result = await copyRequestMessage(t.requestMessage, {
+    const result = await copyRequestMessage(message, {
       clipboard: navigator.clipboard,
       selectMessage() {
         messageRef.current?.focus();
         messageRef.current?.select();
       },
     });
-    setCopyResult({ language, status: result });
+    setCopyResult({ language, listingType, status: result });
   }
 
   return <div className="request-panel" aria-labelledby="request-title">
@@ -105,7 +106,7 @@ function RequestPromotion() {
         <span className="step-number" aria-hidden="true">01</span>
         <div className="request-step-content">
           <label htmlFor="request-message">{t.copyStep}</label>
-          <textarea ref={messageRef} id="request-message" value={t.requestMessage} readOnly rows="4" spellCheck="false" aria-describedby="copy-status" />
+          <textarea ref={messageRef} id="request-message" value={message} readOnly rows="4" spellCheck="false" aria-describedby="copy-status" />
           <button className="button button-outline copy-button" type="button" onClick={copyMessage}>{status === 'copied' ? t.copied : t.copyMessage}<Arrow>{status === 'copied' ? '✓' : '⧉'}</Arrow></button>
           <p className="copy-status" id="copy-status" role="status" aria-live="polite">{status === 'copied' ? t.copySuccess : status === 'manual' ? t.copyFallback : t.copyHint}</p>
         </div>
@@ -130,17 +131,21 @@ function RequestPrivacyNote() {
 
 function Promotion() {
   const { t } = useLanguage();
+  const [listingType,setListingType] = useState('free');
   return <section className="promotion shell" id="promocion" aria-labelledby="promotion-title">
     <div className="promotion-copy">
       <Eyebrow>{t.promotionEyebrow}</Eyebrow>
       <h2 id="promotion-title"><span>{t.promotionLine1}</span><br /><em>{t.promotionLine2}</em></h2>
       <p>{t.promotionDescription}</p>
-      <div className="price-panel"><p className="offer-label">{t.offer}</p><p className="price">5<span>{t.perMonth}</span></p><p className="price-note">{t.limitedTime}</p></div>
+      <fieldset className="listing-plans"><legend>{t.listingOptionsLegend}</legend>
+        <label className="listing-plan"><input type="radio" name="listing-type" value="free" checked={listingType==='free'} onChange={()=>setListingType('free')}/><span className="listing-plan-content"><span className="listing-plan-top"><strong>{t.freeListingTitle}</strong><b>0 €</b></span><span className="listing-plan-description">{t.freeListingDescription}</span></span></label>
+        <label className="listing-plan listing-plan-paid"><input type="radio" name="listing-type" value="paid" checked={listingType==='paid'} onChange={()=>setListingType('paid')}/><span className="listing-plan-content"><span className="listing-plan-top"><strong>{t.paidListingTitle}</strong><b>5 <small>{t.perMonth}</small></b></span><span className="listing-plan-description">{t.paidListingDescription}</span><span className="listing-plan-offer">{t.offer} · {t.limitedTime}</span></span></label>
+      </fieldset>
       <h3 className="inclusion-heading">{t.inclusionTitle}</h3>
       <ul className="inclusions">{['inclusionName', 'inclusionDescription', 'inclusionLink'].map((key) => <li key={key}><Arrow>↳</Arrow><span>{t[key]}</span></li>)}</ul>
       <p className="promotion-note">{t.promotionTerms}</p>
     </div>
-    <RequestPromotion />
+    <RequestPromotion listingType={listingType} />
   </section>;
 }
 

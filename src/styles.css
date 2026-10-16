@@ -108,6 +108,21 @@ h2 { font-size: clamp(32px,3.1vw,44px); line-height: 1.08; }
 .inclusions li { display: flex; gap: 10px; font-size: 15px; color: #d1d8e3; line-height: 1.5; }
 .inclusions li > span[aria-hidden] { color: var(--pink); }
 .promotion-copy > p.promotion-note { max-width: 470px; font-size: 14px; color: var(--muted); }
+.listing-plans {border:0;padding:0;margin:25px 0 24px;display:grid;gap:12px;min-width:0;}
+.listing-plans legend {font-size:14px;font-weight:650;margin-bottom:13px;padding:0;}
+.listing-plan {display:flex;align-items:flex-start;gap:12px;padding:17px;border:1px solid #45556f;border-radius:13px;background:linear-gradient(140deg,#1b293e,#101b2c);box-shadow:inset 0 1px 0 #ffffff10,0 3px 0 #03071180;cursor:pointer;}
+.listing-plan:has(input:checked) {border-color:#b5c7e2;box-shadow:inset 0 1px 0 #ffffff20,0 3px 0 #03071180;}
+.listing-plan-paid:has(input:checked) {border-color:var(--pink);background:linear-gradient(140deg,#35253e,#121b2d);}
+.listing-plan:focus-within {outline:2px solid #ff9fdb;outline-offset:4px;}
+.listing-plan input {flex:0 0 17px;width:17px;height:17px;accent-color:var(--pink);margin:3px 0 0;}
+.listing-plan-content {display:block;min-width:0;flex:1;}
+.listing-plan-top {display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.listing-plan-top strong {font-size:15px;font-weight:650;}
+.listing-plan-top b {font-size:22px;font-weight:650;white-space:nowrap;}
+.listing-plan-top small {font-size:12px;font-weight:400;color:#bdc9dc;}
+.listing-plan-paid .listing-plan-top b {color:#ff9bd7;}
+.listing-plan-description {display:block;font-size:12px;line-height:1.7;color:#c1ccdd;margin-top:7px;}
+.listing-plan-offer {display:block;font-size:10px;line-height:1.6;color:#e2abd0;margin-top:9px;}
 .request-panel { padding: 28px; background: var(--panel); border: 1px solid var(--line); border-top: 2px solid var(--pink); }
 .request-panel > h3 { font-family: var(--display); font-size: 32px; font-weight: 400; line-height: 1.15; }
 .request-intro { color: var(--muted); font-size: 15px; line-height: 1.6; margin-top: 10px; }
