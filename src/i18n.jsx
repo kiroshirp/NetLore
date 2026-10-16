@@ -1,18 +1,13 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import messages from './locales/messages.json';
 import legalMessages from './locales/legal.json';
-import { LANGUAGE_KEY, readLocal, writeLocal } from './privacy-storage.mjs';
+import { LANGUAGE_KEY, writeLocal } from './privacy-storage.mjs';
+import { preferredLanguage } from './language-preference.mjs';
 
 const LanguageContext = createContext(null);
 
-function savedLanguage() {
-  const language = readLocal(LANGUAGE_KEY);
-  if (Object.hasOwn(messages, language)) return language;
-  return 'es';
-}
-
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState(savedLanguage);
+  const [language, setLanguage] = useState(preferredLanguage);
   const t = messages[language];
 
   useEffect(() => {

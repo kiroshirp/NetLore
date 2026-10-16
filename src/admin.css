@@ -6,7 +6,11 @@
 .admin-login {max-width:420px;margin:35px auto;}
 .admin-page label:not(.admin-checkbox) {display:block;font-size:13px;color:#c8d1df;margin-bottom:8px;}
 .admin-page input:not([type=checkbox]),.admin-page select,.admin-page textarea {display:block;width:100%;min-width:0;border:1px solid #53627a;background:#080f1b;color:#edf0f6;padding:12px;border-radius:7px;font:16px/1.5 'Segoe UI',sans-serif;margin-bottom:20px;}
-.admin-page input:focus-visible {outline:2px solid var(--pink);outline-offset:3px;}
+.admin-page input:focus-visible,.admin-page textarea:focus-visible,.admin-page select:focus-visible {outline:2px solid var(--pink);outline-offset:3px;}
+.admin-profile-fields {padding-top:22px;margin-top:26px;border-top:1px solid var(--line);}
+.admin-profile-fields h3 {font-size:19px;margin-bottom:10px;}
+.admin-page .admin-field-hint {font-size:12px;line-height:1.7;color:#adbad0;margin:-2px 0 16px;}
+.admin-profile-fields>p:first-of-type {margin-bottom:24px;}
 .admin-page fieldset {border:0;padding:0;margin:0;min-width:0;}
 .admin-checkbox {display:flex;align-items:center;gap:12px;font-size:14px;margin:18px 0;min-height:32px;}
 .admin-checkbox input {accent-color:var(--pink);width:19px;height:19px;}

@@ -69,7 +69,7 @@
         "title": "Uso real de este sitio",
         "paragraphs": [
           "El código de NetLore no establece cookies HTTP ni incorpora analítica o seguimiento publicitario. Utiliza localStorage, una tecnología del navegador distinta de las cookies, para las dos preferencias descritas a continuación. No se usan para identificarte con fines publicitarios ni para crear perfiles.",
-          "Este es un aviso informativo, no una solicitud de consentimiento para seguimiento. El idioma se guarda solo al elegirlo y el cierre del aviso solo al pulsar «Entendido». Sin elegir un idioma, la web utiliza español sin guardar esa elección por defecto."
+          "Este es un aviso informativo, no una solicitud de consentimiento para seguimiento. El idioma se guarda solo al elegirlo y el cierre del aviso solo al pulsar «Entendido». Sin elegir un idioma, la web utiliza inglés sin guardar esa elección por defecto."
         ]
       },
       "inventoryTitle": "Preferencias de NetLore",
@@ -79,7 +79,7 @@
       ],
       "duration": "Almacenamiento local propio, sin caducidad automática: permanece hasta que lo borres o el navegador elimine los datos del sitio.",
       "controlsTitle": "Controlar estas preferencias",
-      "controls": "Puedes borrarlas con este botón o desde los ajustes del navegador. El botón elimina únicamente las dos preferencias de NetLore. No borra mensajes de Discord ni datos gestionados por Stripe. El idioma actual se mantiene durante esta visita; al recargar sin preferencia guardada, se utiliza español.",
+      "controls": "Puedes borrarlas con este botón o desde los ajustes del navegador. El botón elimina únicamente las dos preferencias de NetLore. No borra mensajes de Discord ni datos gestionados por Stripe. El idioma actual se mantiene durante esta visita; al recargar sin preferencia guardada, se utiliza inglés.",
       "clear": "Borrar preferencias de NetLore",
       "cleared": "Preferencias de NetLore borradas. El aviso volverá a mostrarse.",
       "clearError": "El navegador no ha permitido borrar las preferencias. Puedes hacerlo desde sus ajustes de datos del sitio.",
@@ -159,7 +159,7 @@
         "title": "What this website actually uses",
         "paragraphs": [
           "NetLore’s code does not set HTTP cookies or include analytics or advertising tracking. It uses localStorage, a browser technology different from cookies, for the two preferences described below. They are not used to identify you for advertising or build profiles.",
-          "This is an informational notice, not a request for tracking consent. The language is stored only when you choose it and the dismissal only when you press ‘Understood’. Without a language choice, the website uses Spanish without storing that default choice."
+          "This is an informational notice, not a request for tracking consent. The language is stored only when you choose it and the dismissal only when you press ‘Understood’. Without a language choice, the website uses English without storing that default choice."
         ]
       },
       "inventoryTitle": "NetLore preferences",
@@ -169,7 +169,7 @@
       ],
       "duration": "First-party local storage with no automatic expiry: it remains until you delete it or your browser clears the site data.",
       "controlsTitle": "Control these preferences",
-      "controls": "You can delete them using this button or your browser settings. The button removes only NetLore’s two preferences. It does not delete Discord messages or data handled by Stripe. Your current language remains for this visit; reloading without a saved preference uses Spanish.",
+      "controls": "You can delete them using this button or your browser settings. The button removes only NetLore’s two preferences. It does not delete Discord messages or data handled by Stripe. Your current language remains for this visit; reloading without a saved preference uses English.",
       "clear": "Delete NetLore preferences",
       "cleared": "NetLore preferences deleted. The notice will appear again.",
       "clearError": "The browser did not allow the preferences to be deleted. You can remove them through its site data settings.",
@@ -249,7 +249,7 @@
         "title": "Utilisation réelle de ce site",
         "paragraphs": [
           "Le code de NetLore ne dépose pas de cookies HTTP et n’intègre ni outils d’analyse ni suivi publicitaire. Il utilise localStorage, une technologie du navigateur différente des cookies, pour les deux préférences décrites ci-dessous. Elles ne servent ni à t’identifier à des fins publicitaires ni à créer des profils.",
-          "Il s’agit d’un avis d’information, pas d’une demande de consentement au suivi. La langue est enregistrée uniquement quand tu la choisis et la fermeture de l’avis uniquement en cliquant sur « Compris ». Sans choix de langue, le site utilise l’espagnol sans enregistrer ce choix par défaut."
+          "Il s’agit d’un avis d’information, pas d’une demande de consentement au suivi. La langue est enregistrée uniquement quand tu la choisis et la fermeture de l’avis uniquement en cliquant sur « Compris ». Sans choix de langue, le site utilise l’anglais sans enregistrer ce choix par défaut."
         ]
       },
       "inventoryTitle": "Préférences NetLore",
@@ -259,7 +259,7 @@
       ],
       "duration": "Stockage local propre au site, sans expiration automatique : il reste jusqu’à sa suppression par toi ou par le navigateur.",
       "controlsTitle": "Gérer ces préférences",
-      "controls": "Tu peux les supprimer avec ce bouton ou dans les paramètres du navigateur. Le bouton supprime uniquement les deux préférences NetLore, pas les messages Discord ni les données traitées par Stripe. La langue actuelle reste utilisée pendant cette visite ; recharger sans préférence enregistrée rétablit l’espagnol.",
+      "controls": "Tu peux les supprimer avec ce bouton ou dans les paramètres du navigateur. Le bouton supprime uniquement les deux préférences NetLore, pas les messages Discord ni les données traitées par Stripe. La langue actuelle reste utilisée pendant cette visite ; recharger sans préférence enregistrée rétablit l’anglais.",
       "clear": "Supprimer les préférences NetLore",
       "cleared": "Préférences NetLore supprimées. L’avis réapparaîtra.",
       "clearError": "Le navigateur n’a pas autorisé la suppression. Tu peux effacer ces préférences dans ses paramètres de données des sites.",

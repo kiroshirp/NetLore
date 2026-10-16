@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS servers (
  id TEXT PRIMARY KEY,
  name TEXT NOT NULL,
  description TEXT NOT NULL DEFAULT '',
+ details TEXT NOT NULL DEFAULT '{}',
  category TEXT NOT NULL CHECK(category IN ('roleplay','freeroam','racing','pvp','social','custom')),
  url TEXT NOT NULL,
  promoted INTEGER NOT NULL DEFAULT 0 CHECK(promoted IN (0,1)),

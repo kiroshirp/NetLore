@@ -1,4 +1,4 @@
-import { validateServer } from '../src/server-model.mjs';
+import { validateServer, validateServerDetails } from '../src/server-model.mjs';
 
 const encoder = new TextEncoder();
 const hex = buffer => [...new Uint8Array(buffer)].map(n=>n.toString(16).padStart(2,'0')).join('');
@@ -8,13 +8,13 @@ export async function passwordHash(password,salt) {
  return hex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:encoder.encode(salt),iterations:100000},key,256));
 }
 function equal(a,b) {if(a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0;}
-function publicServer(row) {return {id:row.id,name:row.name,description:row.description,category:row.category,url:row.url,promoted:!!row.promoted};}
+function publicServer(row) {return {id:row.id,name:row.name,description:row.description,category:row.category,url:row.url,promoted:!!row.promoted,details:validateServerDetails(JSON.parse(row.details||'{}'))};}
 function adminServer(row) {return {...publicServer(row),published:!!row.published,revision:row.revision};}
 async function body(request) {
  if(!request.headers.get('content-type')?.startsWith('application/json')) throw new Error('invalid_body');
  const reader=request.body?.getReader();if(!reader)throw new Error('invalid_body');
  const chunks=[];let size=0;
- while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>16384){await reader.cancel();throw new Error('invalid_body');}chunks.push(value);}
+ while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>32768){await reader.cancel();throw new Error('invalid_body');}chunks.push(value);}
  const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
  try{return JSON.parse(new TextDecoder().decode(bytes));}catch{throw new Error('invalid_body');}
 }
@@ -35,7 +35,7 @@ export default {
   const now=Math.floor(Date.now()/1000);
   try {
    if(path==='/servers'&&request.method==='GET') {
-    const {results}=await env.DB.prepare('SELECT id,name,description,category,url,promoted FROM servers WHERE published=1 ORDER BY promoted DESC,name COLLATE NOCASE,id').all();
+    const {results}=await env.DB.prepare('SELECT id,name,description,category,url,promoted,details FROM servers WHERE published=1 ORDER BY promoted DESC,name COLLATE NOCASE,id').all();
     return reply({servers:results.map(publicServer)});
    }
    if(!env.ADMIN_USERNAME_HASH||!env.ADMIN_PASSWORD_HASH||!env.ADMIN_SALT)return reply({error:'not_configured'},503);
@@ -67,7 +67,7 @@ export default {
    }
    if(path==='/admin/servers'&&request.method==='POST') {
     const value=validateServer(await body(request)),id=crypto.randomUUID();
-    const row=await env.DB.prepare('INSERT INTO servers(id,name,description,category,url,promoted,published,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?) RETURNING *').bind(id,value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),now,now).first();return reply({server:adminServer(row)},201);
+    const row=await env.DB.prepare('INSERT INTO servers(id,name,description,category,url,promoted,published,details,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?) RETURNING *').bind(id,value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),JSON.stringify(value.details),now,now).first();return reply({server:adminServer(row)},201);
    }
    const match=path.match(/^\/admin\/servers\/([a-f0-9-]{36})$/);
    if(match&&request.method==='DELETE') {
@@ -79,7 +79,7 @@ export default {
    if(match&&request.method==='PUT') {
     const input=await body(request),value=validateServer(input);
     if(!Number.isSafeInteger(input.revision)||input.revision<1)return reply({error:'invalid_server'},400);
-    const row=await env.DB.prepare('UPDATE servers SET name=?,description=?,category=?,url=?,promoted=?,published=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING *').bind(value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),now,match[1],input.revision).first();
+    const row=await env.DB.prepare('UPDATE servers SET name=?,description=?,category=?,url=?,promoted=?,published=?,details=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING *').bind(value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),JSON.stringify(value.details),now,match[1],input.revision).first();
     return row?reply({server:adminServer(row)}):reply({error:'conflict'},409);
    }
    return reply({error:'not_found'},404);

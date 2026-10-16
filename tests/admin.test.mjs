@@ -52,6 +52,24 @@ test('changed password and expired sessions revoke access',async()=>{
  await DB.prepare('UPDATE sessions SET expires_at=0').run();
  assert.equal((await worker.fetch(request('/admin/servers',{token}),env)).status,401);DB.close();
 });
+
+test('extended profiles persist through create and edit, publish only supplied fields and are deleted with their listing',async()=>{
+ const DB=database(),env={...envBase,DB},token=await login(env);
+ const details={about:'Owner-supplied test presentation.\nSecond paragraph.',features:['Supplied feature'],access:'Owner-supplied entry instructions.',language:'Supplied language'};
+ const response=await worker.fetch(request('/admin/servers',{method:'POST',body:{...fixture,details:{...details,privateNote:'not public'}},token}),env);
+ assert.equal(response.status,201);const row=(await response.json()).server;
+ assert.deepEqual(row.details,details);
+ let publicRow=(await (await worker.fetch(request('/servers'),env)).json()).servers[0];
+ assert.deepEqual(publicRow.details,details);assert.ok(!('privateNote' in publicRow.details));
+ const invalid=await worker.fetch(request('/admin/servers/'+row.id,{method:'PUT',body:{...row,details:{...details,features:Array(9).fill('too many')}},token}),env);
+ assert.equal(invalid.status,400);
+ const update=await worker.fetch(request('/admin/servers/'+row.id,{method:'PUT',body:{...row,details:{about:'Updated supplied text'}},token}),env);
+ assert.equal(update.status,200);const updated=(await update.json()).server;
+ publicRow=(await (await worker.fetch(request('/servers'),env)).json()).servers[0];
+ assert.deepEqual(publicRow.details,{about:'Updated supplied text',features:[],access:'',language:''});
+ assert.equal((await worker.fetch(request('/admin/servers/'+row.id,{method:'DELETE',body:{revision:updated.revision},token}),env)).status,200);
+ assert.equal(await DB.prepare('SELECT * FROM servers WHERE id=?').bind(row.id).first(),null);DB.close();
+});
 test('deletion requires authentication and current revision, and physically removes only the selected row',async()=>{
  const DB=database(),env={...envBase,DB},token=await login(env);
  const create=async(name,published)=>{
