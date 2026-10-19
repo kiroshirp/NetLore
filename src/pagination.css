@@ -1,0 +1,5 @@
+.results-pagination {display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin:24px 0 8px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);}
+.results-pagination>div {display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.results-pagination button {min-height:44px;padding:10px 14px;border:1px solid #53627a;border-radius:9px;background:#152238;color:var(--text);}
+.results-pagination button:hover:not(:disabled) {border-color:var(--pink);}
+.results-pagination button:disabled {opacity:.45;cursor:default;}

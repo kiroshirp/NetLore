@@ -1,10 +1,12 @@
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useRef,useState,useMemo} from 'react';
 import {useLanguage} from './i18n';
 import {SectionLink} from './navigation';
 import {api,API_BASE} from './api.mjs';
 import {CATEGORIES,CATEGORY_LABELS,emptyServerDetails,filterServers} from './server-model.mjs';
 import {profileEditorCopy,localPreviewCopy} from './directory-copy.mjs';
 import './admin.css';
+import Pagination from './Pagination.jsx';
+import {paginate} from './pagination.mjs';
 
 const messages={
  es:{title:'Administrar servidores',login:'Acceso privado',user:'Usuario',password:'Contraseña',signIn:'Entrar',signOut:'Cerrar sesión',new:'Nueva ficha',edit:'Editar ficha',name:'Nombre del servidor',category:'Modalidad',url:'Enlace a Discord o web (HTTPS)',description:'Descripción breve (opcional)',promoted:'Promoción pagada activa',published:'Visible en el directorio',save:'Guardar ficha',cancel:'Cancelar edición',list:'Tus servidores',refresh:'Actualizar lista',none:'Todavía no hay fichas.',editButton:'Editar',paid:'Promocionado',free:'Gratuito',hidden:'Oculto',saved:'Ficha guardada. El directorio ya puede mostrar los cambios.',busy:'Procesando…',public:'Ver directorio',session:'La sesión caduca en una hora y se cierra al recargar.',not_configured:'El panel todavía no está conectado.',invalid_credentials:'Usuario o contraseña incorrectos.',unauthorized:'La sesión ha caducado. Vuelve a entrar.',rate_limited:'Demasiados intentos. Espera 15 minutos antes de volver a intentarlo.',invalid_server:'Revisa el nombre, la modalidad y los campos de la ficha.',invalid_url:'Introduce un enlace HTTPS válido, sin credenciales.',conflict:'Esta ficha ha cambiado en otra sesión. Actualiza la lista y vuelve a seleccionarla antes de guardar.',server_error:'No se ha podido completar la operación. Inténtalo de nuevo.'},
@@ -33,6 +35,11 @@ export default function Admin() {
  const [session,setSession]=useState(null),[username,setUsername]=useState(''),[password,setPassword]=useState('');
  const [servers,setServers]=useState([]),[draft,setDraft]=useState(empty),[busy,setBusy]=useState(false),[notice,setNotice]=useState(null),[refresh,setRefresh]=useState(0);
  const nameRef=useRef(null);
+ const [editorOpen,setEditorOpen]=useState(false),[pageNumber,setPageNumber]=useState(1);
+ useEffect(()=>{if(editorOpen&&session)nameRef.current?.focus();},[editorOpen,session]);
+ function closeEditor(){if(discard()){replaceDraft(empty());setEditorOpen(false);requestAnimationFrame(()=>listTitleRef.current?.focus());}}
+ function newListing(){if(discard()){replaceDraft(empty());setNotice(null);setEditorOpen(true);}}
+
  const baseline=useRef(JSON.stringify(empty()));
  const dirty=JSON.stringify(draft)!==baseline.current;
  function replaceDraft(value){baseline.current=JSON.stringify(value);setDraft(value);}
@@ -50,7 +57,10 @@ export default function Admin() {
  const [deleteTarget,setDeleteTarget]=useState(null);
  const [query,setQuery]=useState(''),[status,setStatus]=useState('all'),[category,setCategory]=useState('all'),[loading,setLoading]=useState(false),[loaded,setLoaded]=useState(false);
  const d=dashboardCopy[language];
- const filteredServers=servers.filter(server=>filterServers([server],'all',query).length>0&&(category==='all'||server.category===category)&&(status==='all'||status==='visible'&&server.published||status==='hidden'&&!server.published||status==='promoted'&&server.promoted));
+ const filteredServers=useMemo(()=>filterServers(servers,category,query).filter(server=>status==='all'||status==='visible'&&server.published||status==='hidden'&&!server.published||status==='promoted'&&server.promoted),[servers,category,query,status]);
+ const page=paginate(filteredServers,pageNumber,15);
+ useEffect(()=>setPageNumber(1),[query,category,status]);
+
  const dialogRef=useRef(null),cancelRef=useRef(null),deleteTriggerRef=useRef(null),listTitleRef=useRef(null);
  const message=code=>c[code]||c.server_error;
  function fail(error){setNotice({error:true,text:message(error.message)});if(error.message==='unauthorized')setSession(null);}
@@ -105,7 +115,7 @@ export default function Admin() {
  async function logout(){
   if(!discard())return;
   const token=session.token;
-  setSession(null);setServers([]);setNotice(null);replaceDraft(empty());setBusy(true);
+  setSession(null);setServers([]);setNotice(null);setEditorOpen(false);replaceDraft(empty());setBusy(true);
   try{await api('/admin/logout',{method:'POST',token});}
   catch{setNotice({error:true,text:c.logout_failed});}finally{setBusy(false);}
  }
@@ -113,12 +123,12 @@ export default function Admin() {
   event.preventDefault();setBusy(true);setNotice(null);
   try{
    await api(draft.id?`/admin/servers/${draft.id}`:'/admin/servers',{method:draft.id?'PUT':'POST',body:JSON.stringify(draft),token:session.token});
-   replaceDraft(empty());setNotice({error:false,text:c.saved});setRefresh(v=>v+1);
+   replaceDraft(empty());setEditorOpen(false);requestAnimationFrame(()=>listTitleRef.current?.focus());setNotice({error:false,text:c.saved});setRefresh(v=>v+1);
   }catch(error){fail(error);}finally{setBusy(false);}
  }
  function field(key,value){setDraft(current=>({...current,[key]:value}));}
  function detailField(key,value){setDraft(current=>({...current,details:{...current.details,[key]:value}}));}
- function edit(server){if(!discard())return;replaceDraft({...server,details:{...emptyServerDetails(),...server.details}});setNotice(null);nameRef.current?.focus();nameRef.current?.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
+ function edit(server){if(!discard())return;setEditorOpen(true);replaceDraft({...server,details:{...emptyServerDetails(),...server.details}});setNotice(null);nameRef.current?.focus();nameRef.current?.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
  return <main id="contenido" className="admin-page shell">
   <div className="admin-heading"><div><p className="eyebrow">NETLORE / ADMIN</p><h1>{c.title}</h1><p className="admin-intro">{d.intro}</p></div><SectionLink className="button button-outline" to="/servidores/">{c.public} ↗</SectionLink></div>
   {/^http:\/\/127\.0\.0\.1(?::\d+)?$/.test(API_BASE)&&<p className="admin-notice" role="note">{localPreviewCopy[language]}</p>}
@@ -128,8 +138,8 @@ export default function Admin() {
   {!session?<form className="admin-login admin-box" onSubmit={login}><h2>{c.login}</h2><label htmlFor="admin-user">{c.user}</label><input id="admin-user" name="username" autoComplete="username" maxLength="128" required value={username} onChange={e=>setUsername(e.target.value)}/><label htmlFor="admin-password">{c.password}</label><input id="admin-password" name="password" type="password" autoComplete="current-password" maxLength="512" required value={password} onChange={e=>setPassword(e.target.value)}/><button className="button button-pink" type="submit" disabled={busy||!API_BASE}>{busy?c.busy:c.signIn}</button></form>:<>
    <div className="admin-session"><p>{c.session}</p><button type="button" className="button button-outline" onClick={logout} disabled={busy}>{c.signOut}</button></div>
    <dl className="admin-stats">{[[d.total,servers.length],[d.visible,servers.filter(s=>s.published).length],[d.hidden,servers.filter(s=>!s.published).length],[d.promoted,servers.filter(s=>s.promoted).length]].map(([label,count])=><div key={label}><dt>{label}</dt><dd>{loaded?count:'—'}</dd></div>)}</dl>
-   <div className="admin-layout"><form className="admin-box" onSubmit={save}>
-    <h2>{draft.id?c.edit:c.new}</h2><fieldset disabled={busy}>
+   <div className="admin-workspace"><form hidden={!editorOpen} className="admin-box admin-editor" onSubmit={save}>
+    <div className="admin-list-heading"><h2>{draft.id?c.edit:c.new}</h2><button type="button" className="admin-cancel" disabled={busy} onClick={closeEditor}>{c.cancel}</button></div><fieldset disabled={busy}>
      <label htmlFor="server-name">{c.name}</label><input ref={nameRef} id="server-name" name="name" value={draft.name} maxLength="80" required onChange={e=>field('name',e.target.value)}/>
      <label htmlFor="server-category">{c.category}</label><select id="server-category" value={draft.category} onChange={e=>field('category',e.target.value)}>{CATEGORIES.map(category=><option key={category} value={category}>{CATEGORY_LABELS[category]}</option>)}</select>
      <label htmlFor="server-url">{c.url}</label><input id="server-url" name="url" type="url" pattern="https://.*" value={draft.url} required maxLength="2048" onChange={e=>field('url',e.target.value)}/>
@@ -141,9 +151,9 @@ export default function Admin() {
       <label htmlFor="server-language">{p.language}</label><input id="server-language" value={draft.details.language} maxLength="80" onChange={e=>detailField('language',e.target.value)}/>
      </div>
      <label className="admin-checkbox"><input type="checkbox" checked={draft.promoted} onChange={e=>field('promoted',e.target.checked)}/>{c.promoted}</label><label className="admin-checkbox"><input type="checkbox" checked={draft.published} onChange={e=>field('published',e.target.checked)}/>{c.published}</label>
-     <button className="button button-pink" type="submit" disabled={featureError}>{busy?c.busy:c.save}</button>{draft.id&&<button className="admin-cancel" type="button" onClick={()=>{if(discard()){replaceDraft(empty());setNotice(null);}}}>{c.cancel}</button>}
+     <button className="button button-pink" type="submit" disabled={featureError}>{busy?c.busy:c.save}</button><button className="admin-cancel" type="button" onClick={closeEditor}>{c.cancel}</button>
     </fieldset></form>
-    <section className="admin-box" aria-labelledby="admin-list-title"><div className="admin-list-heading"><h2 id="admin-list-title" ref={listTitleRef} tabIndex="-1">{c.list}</h2><button type="button" className="admin-cancel" onClick={()=>setRefresh(v=>v+1)} disabled={busy||loading}>{c.refresh}</button></div><div className="admin-filters"><label htmlFor="admin-search">{d.search}<input id="admin-search" type="search" value={query} onChange={e=>setQuery(e.target.value)}/></label><label htmlFor="admin-filter-category">{c.category}<select id="admin-filter-category" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">{d.category}</option>{CATEGORIES.map(value=><option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}</select></label><label htmlFor="admin-filter-status">{d.status}<select id="admin-filter-status" value={status} onChange={e=>setStatus(e.target.value)}>{["all","visible","hidden","promoted"].map(value=><option key={value} value={value}>{d[value]}</option>)}</select></label></div><p className="admin-results" role="status">{loading?d.loading:loaded?filteredServers.length+" "+d.results:"—"}</p>{(query||category!=="all"||status!=="all")&&<button type="button" className="admin-cancel" onClick={()=>{setQuery("");setCategory("all");setStatus("all");}}>{d.reset}</button>}{!loaded?null:filteredServers.length===0?<p className="admin-empty">{servers.length===0?c.none:d.noResults}</p>:<ul className="admin-server-list">{filteredServers.map(server=><li key={server.id}><div><h3>{server.name}</h3><p>{CATEGORY_LABELS[server.category]} · {server.promoted?c.paid:c.free}{!server.published?` · ${c.hidden}`:''}</p></div><div className="admin-row-actions"><button type="button" className="button button-outline" disabled={busy} onClick={()=>edit(server)} aria-label={`${c.editButton}: ${server.name}`}>{c.editButton}</button><button type="button" className="button admin-delete" disabled={busy} onClick={event=>{deleteTriggerRef.current=event.currentTarget;setDeleteTarget(server);}} aria-label={`${c.remove}: ${server.name}`}>{c.remove}</button></div></li>)}</ul>}</section>
+    <section hidden={editorOpen} className="admin-box admin-list-panel" aria-labelledby="admin-list-title"><div className="admin-list-heading"><h2 id="admin-list-title" ref={listTitleRef} tabIndex="-1">{c.list}</h2><button type="button" className="button button-pink" disabled={busy} onClick={newListing}>＋ {c.new}</button><button type="button" className="admin-cancel" onClick={()=>setRefresh(v=>v+1)} disabled={busy||loading}>{c.refresh}</button></div><div className="admin-filters"><label htmlFor="admin-search">{d.search}<input id="admin-search" type="search" value={query} onChange={e=>setQuery(e.target.value)}/></label><label htmlFor="admin-filter-category">{c.category}<select id="admin-filter-category" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">{d.category}</option>{CATEGORIES.map(value=><option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}</select></label><label htmlFor="admin-filter-status">{d.status}<select id="admin-filter-status" value={status} onChange={e=>setStatus(e.target.value)}>{["all","visible","hidden","promoted"].map(value=><option key={value} value={value}>{d[value]}</option>)}</select></label></div><p className="admin-results" role="status">{loading?d.loading:loaded?filteredServers.length+" "+d.results:"—"}</p>{(query||category!=="all"||status!=="all")&&<button type="button" className="admin-cancel" onClick={()=>{setQuery("");setCategory("all");setStatus("all");}}>{d.reset}</button>}{!loaded?null:filteredServers.length===0?<p className="admin-empty">{servers.length===0?c.none:d.noResults}</p>:<ul className="admin-server-list">{page.items.map(server=><li key={server.id}><div><h3>{server.name}</h3><p>{CATEGORY_LABELS[server.category]} · {server.promoted?c.paid:c.free}{!server.published?` · ${c.hidden}`:''}</p></div><div className="admin-row-actions"><button type="button" className="button button-outline" disabled={busy} onClick={()=>edit(server)} aria-label={`${c.editButton}: ${server.name}`}>{c.editButton}</button><button type="button" className="button admin-delete" disabled={busy} onClick={event=>{deleteTriggerRef.current=event.currentTarget;setDeleteTarget(server);}} aria-label={`${c.remove}: ${server.name}`}>{c.remove}</button></div></li>)}</ul>}<Pagination result={page} disabled={busy||loading} onChange={value=>{setPageNumber(value);listTitleRef.current?.focus();listTitleRef.current?.scrollIntoView({block:"start"});}}/></section>
    </div>
   </>}
   <dialog ref={dialogRef} className="admin-delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description" onCancel={event=>{event.preventDefault();cancelDeletion();}}>

@@ -13,7 +13,7 @@ function staticRoutes() {
     configResolved(config) {
       outputDirectory = resolve(config.root, config.build.outDir);
     },
-    async closeBundle() {
+    async writeBundle() {
       const html = await readFile(resolve(outputDirectory, 'index.html'), 'utf8');
       const siteUrl=process.env.NETLORE_SITE_URL||'https://kiroshirp.github.io/NetLore/';
       await writeFile(resolve(outputDirectory,'index.html'),metadataHtml(html,'',siteUrl));

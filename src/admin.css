@@ -56,3 +56,14 @@
 .admin-dialog-actions {display:flex;justify-content:flex-end;flex-wrap:wrap;gap:12px;margin-top:24px;}
 @media(max-width:600px) {.admin-server-list li{align-items:flex-start;flex-wrap:wrap;}.admin-row-actions{width:100%;justify-content:flex-start;}.admin-delete-dialog{padding:22px;}.admin-dialog-actions{justify-content:flex-start;}}
 @media(max-width:750px) {.admin-layout{grid-template-columns:1fr;}.admin-page{width:calc(100% - 32px);padding-top:24px;}.admin-box{padding:20px;}.admin-session{align-items:flex-start;flex-direction:column;}}
+
+.admin-workspace {min-width:0;}
+.admin-workspace [hidden] {display:none!important;}
+.admin-editor {max-width:820px;margin-inline:auto;}
+.admin-list-panel .admin-filters {grid-template-columns:minmax(180px,2fr) minmax(140px,1fr) minmax(140px,1fr);margin-top:20px;}
+.admin-list-panel .admin-filters>label:first-child {grid-column:auto;}
+.admin-server-list li {padding:20px 10px;}
+.admin-server-list li:hover {background:#ffffff04;}
+.admin-server-list li>div:first-child {min-width:0;}
+.admin-list-heading h2 {scroll-margin-top:110px;}
+@media(max-width:650px){.admin-list-panel .admin-filters{grid-template-columns:1fr;}.admin-list-heading{align-items:center;}}

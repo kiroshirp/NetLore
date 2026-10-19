@@ -1,10 +1,12 @@
-import {useEffect,useLayoutEffect,useRef,useState} from 'react';
+import {useMemo,useEffect,useLayoutEffect,useRef,useState} from 'react';
 import {Link,useSearchParams} from 'react-router-dom';
 import {useLanguage} from './i18n';
 import {SectionLink} from './navigation';
 import {api,API_BASE} from './api.mjs';
 import {CATEGORIES,CATEGORY_LABELS,filterServers,orderServers,serverDestination} from './server-model.mjs';
 import {directoryCopy} from './directory-copy.mjs';
+import Pagination from './Pagination.jsx';
+import {paginate} from './pagination.mjs';
 import initialServers from './data/servers.json';
 import './directory.css';
 
@@ -36,8 +38,16 @@ export function ServerProfile({server,c,titleRef}) {
 export default function Directory() {
  const {language,t}=useLanguage(),c=directoryCopy[language];
  const [servers,setServers]=useState(initialServers),[status,setStatus]=useState(API_BASE?'loading':'ready');
- const [category,setCategory]=useState('all'),[query,setQuery]=useState(''),[reload,setReload]=useState(0);
- const [params]=useSearchParams(),selectedId=params.get('servidor');
+ const [reload,setReload]=useState(0);
+ const [params,setParams]=useSearchParams(),selectedId=params.get('servidor');
+ const category=CATEGORIES.includes(params.get('modalidad'))?params.get('modalidad'):'all',query=params.get('q')||'';
+ function updateFilter(key,value){const next=new URLSearchParams(params);next.delete('pagina');if(value&&value!=='all')next.set(key,value);else next.delete(key);setParams(next,{replace:true});}
+ const setCategory=value=>updateFilter('modalidad',value),setQuery=value=>updateFilter('q',value);
+ const listParams=new URLSearchParams(params);listParams.delete('servidor');
+ const backUrl='/servidores/'+(listParams.size?'?'+listParams:'');
+ function profileUrl(id){const next=new URLSearchParams(params);next.set('servidor',id);return '?'+next;}
+ function changePage(page){const next=new URLSearchParams(params);next.set('pagina',String(page));setParams(next);rootRef.current?.closest('.map-content')?.scrollTo({top:0,behavior:'instant'});requestAnimationFrame(()=>document.getElementById('directory-title')?.focus({preventScroll:true}));}
+
  const rootRef=useRef(null),titleRef=useRef(null),previousId=useRef(null),listScroll=useRef(0);
  useEffect(()=>{
   if(!API_BASE)return;
@@ -56,18 +66,20 @@ export default function Directory() {
   previousId.current=selectedId;
  },[selectedId,status]);
  const selected=servers.find(server=>server.id===selectedId);
- const filtered=filterServers(servers,category,query);
- const groups=[{label:c.promoted,note:c.paidNote,items:filtered.filter(server=>server.promoted)},{label:c.free,note:c.freeNote,items:filtered.filter(server=>!server.promoted)}];
+ const filtered=useMemo(()=>filterServers(servers,category,query),[servers,category,query]);
+ const page=paginate(filtered,params.get('pagina')||1,12);
+ const groups=[{label:c.promoted,note:c.paidNote,items:page.items.filter(server=>server.promoted)},{label:c.free,note:c.freeNote,items:page.items.filter(server=>!server.promoted)}];
  const rememberScroll=()=>{listScroll.current=rootRef.current?.closest('.map-content')?.scrollTop||0;};
- const resetFilters=()=>{setCategory('all');setQuery('');};
+ const resetFilters=()=>setParams({}, {replace:true});
  const pending=status==='loading'?<p role="status" className="directory-status">{c.loading}</p>:status==='error'?<div className="directory-status" role="alert"><p>{c.error}</p><button type="button" className="button button-outline" onClick={()=>{setStatus('loading');setReload(value=>value+1);}}>{c.retry}</button></div>:null;
  return <section ref={rootRef} className={`directory shell ${selectedId?'directory-profile':''}`} id="servidores" aria-labelledby={selectedId&&selected&&status==='ready'?'server-profile-title':'directory-title'}>
-  {selectedId?<div className="directory-view" key={selectedId}><Link className="profile-back" to="/servidores/">← {c.back}</Link>{pending&&<h2 className="sr-only" id="directory-title">{c.loading}</h2>}{pending|| (selected?<ServerProfile server={selected} c={c} titleRef={titleRef}/>:<div className="directory-status"><h2 id="directory-title" ref={titleRef} tabIndex="-1">{c.unavailable}</h2><Link className="button button-outline" to="/servidores/">{c.browse}</Link></div>)}</div>:<div className="directory-view" key="list">
-   <div className="directory-overview"><div><div className="section-heading"><div><p className="eyebrow">CYBERPUNK / OPEN2077</p><h2 id="directory-title">{t.directoryTitle}</h2></div></div>
+  {selectedId?<div className="directory-view" key={selectedId}><Link className="profile-back" to={backUrl}>← {c.back}</Link>{pending&&<h2 className="sr-only" id="directory-title">{c.loading}</h2>}{pending|| (selected?<ServerProfile server={selected} c={c} titleRef={titleRef}/>:<div className="directory-status"><h2 id="directory-title" ref={titleRef} tabIndex="-1">{c.unavailable}</h2><Link className="button button-outline" to="/servidores/">{c.browse}</Link></div>)}</div>:<div className="directory-view" key="list">
+   <div className="directory-overview"><div><div className="section-heading"><div><p className="eyebrow">CYBERPUNK / OPEN2077</p><h2 id="directory-title" tabIndex="-1">{t.directoryTitle}</h2></div></div>
    <p className="directory-description">{c.intro}</p></div>
    <div className="directory-tools"><div className="directory-search"><label className="sr-only" htmlFor="directory-query">{c.search}</label><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="directory-query" type="search" value={query} placeholder={c.searchHint} onChange={event=>setQuery(event.target.value)}/>{query&&<button type="button" aria-label={c.clear} onClick={()=>setQuery('')}>×</button>}</div><div className="directory-count" role="status" aria-live="polite">{status==='ready'&&<><strong>{filtered.length}</strong> {filtered.length===1?c.listing:c.listings}</>}</div></div>
    </div><div className="directory-listing-callout"><p>{t.directoryListingNote}</p><SectionLink to="/promocion/">{t.listingRequestLink}<span aria-hidden="true">→</span></SectionLink></div><div className="category-filters" role="group" aria-label={c.filters}>{['all',...CATEGORIES].map(value=><button type="button" key={value} aria-pressed={category===value} onClick={()=>setCategory(value)}><span>{value==='all'?c.all:CATEGORY_LABELS[value]}</span><small>{value==='all'?servers.length:servers.filter(server=>server.category===value).length}</small></button>)}</div>
-   {pending|| (servers.length===0?<div className="directory-empty"><div className="empty-copy"><p className="eyebrow">{t.emptyEyebrow}</p><h3>{t.emptyTitle}</h3><p>{t.emptyDescription}</p></div><SectionLink className="text-link" to="/promocion/">{t.appearHere} ↗</SectionLink></div>:filtered.length===0?<div className="directory-status"><p role="status">{c.noMatches}</p><button type="button" className="button button-outline" onClick={resetFilters}>{c.reset}</button></div>:groups.map(group=>group.items.length>0&&<div className="directory-group" key={group.label}><div className="directory-group-heading"><h3>{group.label} <span>{group.items.length}</span></h3><span>{group.note}</span></div><div className="server-grid">{group.items.map(server=><article key={server.id} className={`server-card ${server.promoted?'server-promoted':'server-free'}`}><Link className="server-card-link" to={`?servidor=${encodeURIComponent(server.id)}`} data-server-id={server.id} onClick={rememberScroll} aria-label={`${c.view}: ${server.name}`}><div className="server-card-art"><ServerIdentity server={server}/><span className="server-art-mode" aria-hidden="true">{CATEGORY_LABELS[server.category]}</span><span className="server-meta">{server.promoted?<><span aria-hidden="true">✦</span> {c.paidNote}</>:c.freeBadge}</span></div><div className="server-card-body"><div className="server-card-top"><span className="server-category">{CATEGORY_LABELS[server.category]}</span><span className="server-platform">Open2077</span></div><h4>{server.name}</h4>{server.description&&<p className="server-excerpt">{server.description}</p>}{server.details?.language&&<span className="server-card-language">{server.details.language}</span>}<span className="server-card-action"><span>{c.view}<small>{c.more}</small></span><span className="server-card-arrow" aria-hidden="true">→</span></span></div></Link></article>)}</div></div>))}
+   {pending|| (servers.length===0?<div className="directory-empty"><div className="empty-copy"><p className="eyebrow">{t.emptyEyebrow}</p><h3>{t.emptyTitle}</h3><p>{t.emptyDescription}</p></div><SectionLink className="text-link" to="/promocion/">{t.appearHere} ↗</SectionLink></div>:filtered.length===0?<div className="directory-status"><p role="status">{c.noMatches}</p><button type="button" className="button button-outline" onClick={resetFilters}>{c.reset}</button></div>:groups.map(group=>group.items.length>0&&<div className="directory-group" key={group.label}><div className="directory-group-heading"><h3>{group.label} <span>{group.items.length}</span></h3><span>{group.note}</span></div><div className="server-grid">{group.items.map(server=><article key={server.id} className={`server-card ${server.promoted?'server-promoted':'server-free'}`}><Link className="server-card-link" to={profileUrl(server.id)} data-server-id={server.id} onClick={rememberScroll} aria-label={`${c.view}: ${server.name}`}><div className="server-card-art"><ServerIdentity server={server}/><span className="server-art-mode" aria-hidden="true">{CATEGORY_LABELS[server.category]}</span><span className="server-meta">{server.promoted?<><span aria-hidden="true">✦</span> {c.paidNote}</>:c.freeBadge}</span></div><div className="server-card-body"><div className="server-card-top"><span className="server-category">{CATEGORY_LABELS[server.category]}</span><span className="server-platform">Open2077</span></div><h4>{server.name}</h4>{server.description&&<p className="server-excerpt">{server.description}</p>}{server.details?.language&&<span className="server-card-language">{server.details.language}</span>}<span className="server-card-action"><span>{c.view}<small>{c.more}</small></span><span className="server-card-arrow" aria-hidden="true">→</span></span></div></Link></article>)}</div></div>))}
+   {status==='ready'&&<Pagination result={page} onChange={changePage}/>}
    {status==='ready'&&servers.length>0&&<p className="directory-disclosure">{c.notice}</p>}
   </div>}
  </section>;
