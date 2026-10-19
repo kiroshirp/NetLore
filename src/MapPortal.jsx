@@ -129,6 +129,7 @@ export function MapPortal({directory,promotion,questions,citizen}) {
   function toggleFree() { resetCamera(); setFree(!free); }
   function zoom(delta) {stopMotion();setDragging(false);camera.current.z = Math.max(.7,Math.min(2.5,camera.current.z + delta));paint();}
   return <main id="contenido" ref={portalRef} className={`map-portal ${home?'map-home':'map-detail'} ${free?'map-free':''} ${dragging?'map-dragging':''}`}>
+    {!home&&<h1 className="sr-only">{items.find(item=>item.to===pathname)?.label}</h1>}
     <div className="city-stage" aria-label="Night City" onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp}>
       <div className="city-grid" />
       <div className="city-camera"><div className="city-manual" ref={manualRef}>

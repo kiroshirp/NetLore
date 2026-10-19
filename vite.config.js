@@ -17,7 +17,7 @@ function staticRoutes() {
       for (const route of ['servidores', 'promocion', 'informacion', 'pase', 'privacidad', 'cookies', 'admin']) {
         const directory = resolve(outputDirectory, route);
         await mkdir(directory, { recursive: true });
-        await writeFile(resolve(directory, 'index.html'), html);
+        await writeFile(resolve(directory, 'index.html'), route==='admin'?html.replace('</head>','<meta name="robots" content="noindex, nofollow" /></head>'):html);
       }
     },
   };

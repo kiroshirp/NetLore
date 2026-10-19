@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useLanguage } from './i18n';
 import { NavigationEffects, SectionLink, scrollToSection } from './navigation';
 import ServerDirectory from './Directory';
-import Admin from './Admin';
+const Admin = lazy(() => import('./Admin'));
 import { copyRequestMessage, listingRequestMessage } from './copy-request.mjs';
 import { CookiesPage, PrivacyNotice, PrivacyPage } from './Privacy';
 import { clearNetLorePreferences, NOTICE_KEY, NOTICE_VERSION, readLocal, writeLocal } from './privacy-storage.mjs';
 import { MapPortal } from './MapPortal';
-import CitizenPass from './CitizenPass';
+const CitizenPass = lazy(() => import('./CitizenPass'));
 
 const discordUrl = 'https://discord.gg/YkKv6X6gQB';
 const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
@@ -206,7 +206,7 @@ export default function App() {
     <NavigationEffects />
     <button className="skip-link" type="button" onClick={() => scrollToSection('contenido', true)}>{t.skip}</button>
     <Header />
-    <Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/pase/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/admin/" element={<Admin />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes>
+    <Suspense fallback={<main id="contenido" className="shell" aria-busy="true"><p role="status">NetLore…</p></main>}><Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/pase/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/admin/" element={<Admin />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes></Suspense>
     <Footer onOpenNotice={openNotice} noticeTriggerRef={noticeTriggerRef} />
     {noticeVisible && <PrivacyNotice onDismiss={dismissNotice} focusOnOpen={focusNotice} returnFocusRef={noticeTriggerRef} />}
   </div>;

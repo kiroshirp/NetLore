@@ -15,6 +15,13 @@ test('profile validation rejects malformed and oversized fields rather than sile
  for(const input of [null,[],{about:42},{about:'a'.repeat(3001)},{access:'a'.repeat(1501)},{language:'a'.repeat(81)},{features:'text'},{features:[{}]},{features:['a'.repeat(101)]},{features:Array(9).fill('x')}])assert.throws(()=>validateServerDetails(input),/invalid_server/);
 });
 
+test('eight features tolerate trailing and blank lines without losing limits',()=>{
+ const features=Array.from({length:8},(_,i)=>`Feature ${i}`);
+ assert.deepEqual(validateServerDetails({features:[...features,'','  ']}).features,features);
+ assert.throws(()=>validateServerDetails({features:[...features,'Ninth']}),/invalid_server/);
+ assert.throws(()=>validateServerDetails({features:['x'.repeat(101),'']}),/invalid_server/);
+});
+
 test('search combines category and accent-insensitive words, preserves paid ordering and never mutates records',()=>{
  const servers=[{id:'a',name:'Ámbar',category:'roleplay',description:'Presentación',promoted:false},{id:'b',name:'Otro',category:'racing',promoted:true,details:{about:'Carreras',features:['Circuitos urbanos'],language:'Español'}}];
  assert.deepEqual(filterServers(servers,'all','AMBAR presentacion').map(row=>row.id),['a']);

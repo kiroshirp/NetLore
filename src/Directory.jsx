@@ -43,7 +43,8 @@ export default function Directory() {
   if(!API_BASE)return;
   const controller=new AbortController();
   api('/servers',{signal:controller.signal}).then(data=>{setServers(orderServers(data.servers));setStatus('ready');}).catch(error=>{if(error.name!=='AbortError')setStatus('error');});
-  const onFocus=()=>{if(document.visibilityState==='visible')setReload(value=>value+1);};
+  let lastRefresh=Date.now();
+  const onFocus=()=>{if(document.visibilityState==='visible'&&Date.now()-lastRefresh>30000){lastRefresh=Date.now();setReload(value=>value+1);}};
   window.addEventListener('focus',onFocus);
   return()=>{controller.abort();window.removeEventListener('focus',onFocus);};
  },[reload]);

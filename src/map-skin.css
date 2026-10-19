@@ -132,3 +132,7 @@
  .map-dock:hover .dock-text,.map-dock:focus-within .dock-text { opacity:1; max-width:200px; }
 }
 @media(prefers-reduced-motion:reduce) { .map-portal .city-camera,.map-portal.map-free .city-camera,.city-manual,.map-dock,.map-dock a,.map-dock button {transition:none;} .map-content,.map-intro {animation:none;} }
+
+/* Keep auxiliary copy readable at every breakpoint. */
+.map-caption a {font-size:11px;}
+.map-application .footer-legal a,.map-application .footer-legal button {font-size:12px;min-height:32px;}

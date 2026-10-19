@@ -14,6 +14,13 @@ function database(){
 }
 function request(path,{method='GET',body,token,origin='https://kiroshirp.github.io'}={}){return new Request('https://test.invalid'+path,{method,headers:{Origin:origin,...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},...(body?{body:JSON.stringify(body)}:{})});}
 const fixture={name:'Isolated test fixture',description:'Only used in an in-memory test database.',category:'roleplay',url:'https://example.com/',promoted:false,published:true};
+test('login rejects JSON primitives and arrays with a client error',async()=>{
+ const DB=database(),env={...envBase,DB};
+ try{for(const value of [null,[],42,'text',true]){
+  const response=await worker.fetch(new Request('https://test.invalid/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(value)}),env);
+  assert.equal(response.status,400);assert.equal((await response.json()).error,'invalid_body');
+ }}finally{DB.close();}
+});
 async function login(env){const response=await worker.fetch(request('/admin/login',{method:'POST',body:{username:'test-admin',password:'isolated-test-password'}}),env);assert.equal(response.status,200);return (await response.json()).token;}
 
 test('server validation rejects unsafe URLs, unsupported categories and non-boolean promotion flags',()=>{

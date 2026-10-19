@@ -49,9 +49,14 @@ export function citizenSvg({name,role,faction='maelstrom',format='wide',language
   </g></svg>`;
 }
 
-export async function loadCardLogos(base) {
+const logoRequests=new Map();
+export function loadCardLogos(base) {
+ if(!logoRequests.has(base))logoRequests.set(base,fetchCardLogos(base).catch(error=>{logoRequests.delete(base);throw error;}));
+ return logoRequests.get(base);
+}
+async function fetchCardLogos(base) {
   const values=await Promise.all(['netlore-logo.png','open77-logo.png'].map(async name=>{
-    const response=await fetch(`${base}assets/${name}`);
+    const response=await fetch(`${base}assets/${name}`,{signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw new Error('Logo unavailable');
     const blob=await response.blob();
     return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});

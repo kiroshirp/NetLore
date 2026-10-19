@@ -16,7 +16,7 @@ async function body(request) {
  const chunks=[];let size=0;
  while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>32768){await reader.cancel();throw new Error('invalid_body');}chunks.push(value);}
  const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
- try{return JSON.parse(new TextDecoder().decode(bytes));}catch{throw new Error('invalid_body');}
+ try{const input=JSON.parse(new TextDecoder().decode(bytes));if(!input||typeof input!=='object'||Array.isArray(input))throw new Error();return input;}catch{throw new Error('invalid_body');}
 }
 export default {
  async scheduled(event,env) {

@@ -15,8 +15,9 @@ export function validateServerDetails(input) {
     if (details[key].length > limit) throw new Error('invalid_server');
   }
   if (input.features !== undefined) {
-    if (!Array.isArray(input.features) || input.features.length > 8 || input.features.some(value=>typeof value !== 'string' || value.trim().length > 100)) throw new Error('invalid_server');
+    if (!Array.isArray(input.features) || input.features.some(value=>typeof value !== 'string' || value.trim().length > 100)) throw new Error('invalid_server');
     details.features = [...new Set(input.features.map(value=>value.trim()).filter(Boolean))];
+    if(input.features.filter(value=>value.trim()).length>8)throw new Error('invalid_server');
   }
   return details;
 }
