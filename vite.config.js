@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import {metadataHtml,publicRoutes} from './src/page-metadata.mjs';
 
 // Real entry points also support refreshing clean URLs on static hosts.
 function staticRoutes() {
@@ -14,10 +15,12 @@ function staticRoutes() {
     },
     async closeBundle() {
       const html = await readFile(resolve(outputDirectory, 'index.html'), 'utf8');
-      for (const route of ['servidores', 'promocion', 'informacion', 'pase', 'privacidad', 'cookies', 'admin']) {
+      const siteUrl=process.env.NETLORE_SITE_URL||'https://kiroshirp.github.io/NetLore/';
+      await writeFile(resolve(outputDirectory,'index.html'),metadataHtml(html,'',siteUrl));
+      for (const route of [...publicRoutes,'admin']) {
         const directory = resolve(outputDirectory, route);
         await mkdir(directory, { recursive: true });
-        await writeFile(resolve(directory, 'index.html'), route==='admin'?html.replace('</head>','<meta name="robots" content="noindex, nofollow" /></head>'):html);
+        await writeFile(resolve(directory, 'index.html'), metadataHtml(html,route,siteUrl));
       }
     },
   };

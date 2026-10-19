@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import {pageTitle} from './page-metadata.mjs';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { useLanguage } from './i18n';
 import { NavigationEffects, SectionLink, scrollToSection } from './navigation';
@@ -182,14 +183,19 @@ function NotFound() {
 }
 
 export default function App() {
-  const { t, legal } = useLanguage();
+  const { t, legal, language } = useLanguage();
   const { pathname } = useLocation();
   const [noticeVisible, setNoticeVisible] = useState(() => readLocal(NOTICE_KEY) !== NOTICE_VERSION);
   const [focusNotice, setFocusNotice] = useState(false);
   const noticeTriggerRef = useRef(null);
   useEffect(() => {
-    document.title = pathname.startsWith('/admin') ? 'Admin — NetLore' : pathname.startsWith('/privacidad') ? `${legal.privacy.title} — NetLore` : pathname.startsWith('/cookies') ? `${legal.cookies.title} — NetLore` : t.pageTitle;
-  }, [pathname, legal, t.pageTitle]);
+    document.title = pageTitle(pathname,language,t.pageTitle);
+    const canonical=document.querySelector('link[rel="canonical"]');
+    const url=new URL(import.meta.env.BASE_URL.replace(/\/$/,'')+pathname,location.origin).href;
+    if(canonical)canonical.href=url;
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content',document.title);
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content',url);
+  }, [pathname, language, t.pageTitle]);
   function dismissNotice() {
     writeLocal(NOTICE_KEY, NOTICE_VERSION);
     setNoticeVisible(false);

@@ -67,10 +67,12 @@ async function fetchCardLogos(base) {
 export async function cardPng(svg) {
   const image=new Image();
   const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+  const timers=[];
+  const bounded=task=>Promise.race([task,new Promise((_,reject)=>timers.push(setTimeout(()=>reject(new Error('Image timeout')),15000)))]);
   try {
-    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src=url;});
+    await bounded(new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src=url;}));
     const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
     const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas unavailable');ctx.drawImage(image,0,0);
-    return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG unavailable')),'image/png'));
-  } finally { URL.revokeObjectURL(url); }
+    return await bounded(new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('PNG unavailable')),'image/png')));
+  } finally { timers.forEach(clearTimeout);image.onload=null;image.onerror=null;URL.revokeObjectURL(url); }
 }

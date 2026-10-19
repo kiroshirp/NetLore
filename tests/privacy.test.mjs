@@ -1,3 +1,4 @@
+import {publicRoutes} from '../src/page-metadata.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -66,5 +67,5 @@ test('public controller details are limited to the supplied identity and contact
 
 test('static hosting includes the two clean policy routes', async () => {
   const config = await readFile(new URL('../vite.config.js', import.meta.url), 'utf8');
-  for (const route of ['privacidad', 'cookies']) assert.ok(config.includes(`'${route}'`));
+  for (const route of ['privacidad', 'cookies']) assert.ok(publicRoutes.includes(route));
 });
