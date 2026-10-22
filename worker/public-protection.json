@@ -1,0 +1,6 @@
+{
+  "bindings": [
+    {"name":"PUBLIC_RATE_LIMITER","type":"ratelimit","namespace_id":"2026102201","simple":{"limit":15,"period":10}},
+    {"name":"PUBLIC_PROTECTION_REQUIRED","type":"plain_text","text":"true"}
+  ]
+}

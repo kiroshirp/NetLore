@@ -35,8 +35,25 @@ export default {
   const now=Math.floor(Date.now()/1000);
   try {
    if(path==='/servers'&&request.method==='GET') {
+    // Enforce before cache hits too. Never trust client-supplied forwarded IPs.
+    if(env.PUBLIC_PROTECTION_REQUIRED==='true'&&!env.PUBLIC_RATE_LIMITER)return reply({error:'temporarily_unavailable'},503);
+    if(env.PUBLIC_RATE_LIMITER){
+     const ip=request.headers.get('CF-Connecting-IP')||'unknown';
+     const {success}=await env.PUBLIC_RATE_LIMITER.limit({key:ip});
+     if(!success){headers['Retry-After']='10';return reply({error:'rate_limited'},429);}
+    }
+    // Query strings and Origin cannot create unbounded cache variants. CORS is
+    // added per response, never stored with the shared public JSON.
+    const cache=globalThis.caches?.default;
+    const cacheKey=new Request(new URL('/__netlore_public_servers_v1',request.url).href);
+    let cached;
+    try{cached=await cache?.match(cacheKey);}catch{/* Rate limiting still protects D1. */}
+    if(cached)return new Response(cached.body,{headers:{...headers,'X-NetLore-Cache':'HIT'}});
     const {results}=await env.DB.prepare('SELECT id,name,description,category,url,promoted,details FROM servers WHERE published=1 ORDER BY promoted DESC,name COLLATE NOCASE,id').all();
-    return reply({servers:results.map(publicServer)});
+    const json=JSON.stringify({servers:results.map(publicServer)});
+    let stored=false;
+    if(cache)try{await cache.put(cacheKey,new Response(json,{headers:{'Content-Type':'application/json','Cache-Control':'public, max-age=30'}}));stored=true;}catch{/* Do not fail a valid directory read on cache errors. */}
+    return new Response(json,{headers:{...headers,'X-NetLore-Cache':stored?'MISS':'BYPASS'}});
    }
    if(!env.ADMIN_USERNAME_HASH||!env.ADMIN_PASSWORD_HASH||!env.ADMIN_SALT)return reply({error:'not_configured'},503);
    if(path==='/admin/login'&&request.method==='POST') {
