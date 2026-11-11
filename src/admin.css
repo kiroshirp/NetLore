@@ -67,3 +67,5 @@
 .admin-server-list li>div:first-child {min-width:0;}
 .admin-list-heading h2 {scroll-margin-top:110px;}
 @media(max-width:650px){.admin-list-panel .admin-filters{grid-template-columns:1fr;}.admin-list-heading{align-items:center;}}
+
+.admin-sections{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}.resource-description{white-space:pre-line;overflow-wrap:anywhere}.admin-box>form{margin-top:20px}

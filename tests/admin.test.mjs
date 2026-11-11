@@ -14,6 +14,24 @@ function database(){
 }
 function request(path,{method='GET',body,token,origin='https://kiroshirp.github.io'}={}){return new Request('https://test.invalid'+path,{method,headers:{Origin:origin,...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:`Bearer ${token}`}:{})},...(body?{body:JSON.stringify(body)}:{})});}
 const fixture={name:'Isolated test fixture',description:'Only used in an in-memory test database.',category:'roleplay',url:'https://example.com/',promoted:false,published:true};
+test('resource library remains owner-only, including ready resources and conflicting edits',async()=>{
+ const DB=database(),env={...envBase,DB};
+ const data={name:'Private test script',category:'script',status:'draft',url:'https://example.com/docs',description:'Internal'};
+ const call=(path,options={})=>worker.fetch(request(path,options),env);
+ try{
+  for(const method of ['GET','POST'])assert.equal((await call('/admin/resources',{method,...(method==='POST'?{body:data}:{})})).status,401);
+  const token=await login(env);
+  assert.equal((await call('/admin/resources',{token,method:'POST',body:{...data,url:'javascript:alert(1)'}})).status,400);
+  const created=await call('/admin/resources',{token,method:'POST',body:data});assert.equal(created.status,201);
+  const row=(await created.json()).resource,path='/admin/resources/'+row.id;
+  assert.equal((await call(path,{method:'PUT',body:row})).status,401);
+  assert.equal((await call(path,{method:'PUT',token,body:{...row,status:'ready'}})).status,200);
+  assert.equal((await call(path,{method:'PUT',token,body:row})).status,409);
+  const list=await call('/admin/resources',{token});assert.equal(list.headers.get('cache-control'),'no-store');
+  assert.equal((await list.json()).resources[0].status,'ready');assert.deepEqual((await (await call('/servers')).json()).servers,[]);
+  await call('/admin/logout',{method:'POST',token});assert.equal((await call('/admin/resources',{token})).status,401);
+ }finally{DB.close();}
+});
 test('login rejects JSON primitives and arrays with a client error',async()=>{
  const DB=database(),env={...envBase,DB};
  try{for(const value of [null,[],42,'text',true]){

@@ -1,4 +1,4 @@
-# Estado breve — 22/10/2026
+# Estado breve — 11/11/2026
 
 ## Arquitectura
 - React/Vite; frontend publicado en https://kiroshirp.github.io/NetLore/ mediante main/GitHub Actions.
@@ -6,6 +6,7 @@
 - Migración a Cloudflare del frontend: propuesta/preparada, NO realizada ni subdominio reservado. Ver CLOUDFLARE-HOSTING.md.
 
 ## Decisiones y estado previo comprobado
+- Biblioteca de recursos Open77: exclusivamente para el propietario desde /admin, con fichas en D1 separadas del directorio público. «Listo» es interno. Sin cuentas de compradores, pagos ni publicación. Migración 0003 aplicada; API desplegada y comprobada (401 sin sesión, 200 con sesión). Alta/edición comprobadas en SQLite local, sin crear recursos en producción.
 - Admin: lista de 15 fichas, editor separado, validación, aviso de cambios pendientes, borrador retenido ante expiración mientras componente abierto.
 - Directorio: 12 fichas por página, filtros en URL. La API aún devuelve todas las fichas; falta paginación SQL.
 - 48 pruebas pasaban antes de la corrección de caché/límite. No dar por verificada la UI admin con catálogo poblado.

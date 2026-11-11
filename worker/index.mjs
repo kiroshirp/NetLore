@@ -78,6 +78,20 @@ export default {
    const tokenHash=await digest(authorization.slice(7));
    const session=await env.DB.prepare('SELECT expires_at FROM sessions WHERE token_hash=? AND auth_version=? AND expires_at>?').bind(tokenHash,env.ADMIN_PASSWORD_HASH,now).first();
    if(!session)return reply({error:'unauthorized'},401);
+   if(path==='/admin/resources'&&request.method==='GET'){
+    const {results}=await env.DB.prepare('SELECT * FROM private_resources ORDER BY name COLLATE NOCASE,id').all();return reply({resources:results});
+   }
+   const resource=path.match(/^\/admin\/resources\/([a-f0-9-]{36})$/);
+   if((path==='/admin/resources'&&request.method==='POST')||(resource&&request.method==='PUT')){
+    const input=await body(request);
+    const {category,status}=input;
+    if(typeof input.name!=='string'||!input.name.trim()||input.name.length>100||!['script','map','addon','other'].includes(category)||!['draft','ready'].includes(status)||typeof input.description!=='string'||input.description.length>2000||typeof input.url!=='string'||input.url.length>2048)return reply({error:'invalid_resource'},400);
+    const url=input.url.trim();if(url){let parsed;try{parsed=new URL(url);}catch{return reply({error:'invalid_url'},400);}if(parsed.protocol!=='https:'||parsed.username||parsed.password)return reply({error:'invalid_url'},400);}
+    const fields=[input.name.trim(),category,status,input.description.trim(),url];
+    if(resource&&(!Number.isSafeInteger(input.revision)||input.revision<1))return reply({error:'invalid_resource'},400);
+    const row=resource?await env.DB.prepare('UPDATE private_resources SET name=?,category=?,status=?,description=?,url=?,revision=revision+1 WHERE id=? AND revision=? RETURNING *').bind(...fields,resource[1],input.revision).first():await env.DB.prepare('INSERT INTO private_resources(name,category,status,description,url,id) VALUES(?,?,?,?,?,?) RETURNING *').bind(...fields,crypto.randomUUID()).first();
+    return row?reply({resource:row},resource?200:201):reply({error:'conflict'},409);
+   }
    if(path==='/admin/logout'&&request.method==='POST') {await env.DB.prepare('DELETE FROM sessions WHERE token_hash=?').bind(tokenHash).run();return reply({ok:true});}
    if(path==='/admin/servers'&&request.method==='GET') {
     const {results}=await env.DB.prepare('SELECT * FROM servers ORDER BY promoted DESC,name COLLATE NOCASE,id').all();return reply({servers:results.map(adminServer)});

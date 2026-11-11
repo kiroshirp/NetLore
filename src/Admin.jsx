@@ -1,3 +1,4 @@
+import PrivateResources,{resourceCopy} from './PrivateResources.jsx';
 import {useEffect,useRef,useState,useMemo} from 'react';
 import {useLanguage} from './i18n';
 import {SectionLink} from './navigation';
@@ -34,6 +35,7 @@ export default function Admin() {
  const {language}=useLanguage(),c={...messages[language],...deletionMessages[language],...editorCopy[language]},p=profileEditorCopy[language];
  const [session,setSession]=useState(null),[username,setUsername]=useState(''),[password,setPassword]=useState('');
  const [servers,setServers]=useState([]),[draft,setDraft]=useState(empty),[busy,setBusy]=useState(false),[notice,setNotice]=useState(null),[refresh,setRefresh]=useState(0);
+ const [section,setSection]=useState('servers'),[resourceEditor,setResourceEditor]=useState(null);
  const nameRef=useRef(null);
  const [editorOpen,setEditorOpen]=useState(false),[pageNumber,setPageNumber]=useState(1);
  useEffect(()=>{if(editorOpen&&session)nameRef.current?.focus();},[editorOpen,session]);
@@ -41,7 +43,7 @@ export default function Admin() {
  function newListing(){if(discard()){replaceDraft(empty());setNotice(null);setEditorOpen(true);}}
 
  const baseline=useRef(JSON.stringify(empty()));
- const dirty=JSON.stringify(draft)!==baseline.current;
+ const dirty=JSON.stringify(draft)!==baseline.current||Boolean(resourceEditor&&JSON.stringify(resourceEditor.values)!==JSON.stringify(resourceEditor.original));
  function replaceDraft(value){baseline.current=JSON.stringify(value);setDraft(value);}
  function discard(){return !dirty||window.confirm(c.discard);}
  useEffect(()=>{
@@ -114,7 +116,7 @@ export default function Admin() {
  }
  async function logout(){
   if(!discard())return;
-  const token=session.token;
+  const token=session.token;setResourceEditor(null);setSection("servers");
   setSession(null);setServers([]);setNotice(null);setEditorOpen(false);replaceDraft(empty());setBusy(true);
   try{await api('/admin/logout',{method:'POST',token});}
   catch{setNotice({error:true,text:c.logout_failed});}finally{setBusy(false);}
@@ -137,6 +139,8 @@ export default function Admin() {
   {notice&&<p className={`admin-notice ${notice.error?'is-error':''}`} role={notice.error?'alert':'status'}>{notice.text}</p>}
   {!session?<form className="admin-login admin-box" onSubmit={login}><h2>{c.login}</h2><label htmlFor="admin-user">{c.user}</label><input id="admin-user" name="username" autoComplete="username" maxLength="128" required value={username} onChange={e=>setUsername(e.target.value)}/><label htmlFor="admin-password">{c.password}</label><input id="admin-password" name="password" type="password" autoComplete="current-password" maxLength="512" required value={password} onChange={e=>setPassword(e.target.value)}/><button className="button button-pink" type="submit" disabled={busy||!API_BASE}>{busy?c.busy:c.signIn}</button></form>:<>
    <div className="admin-session"><p>{c.session}</p><button type="button" className="button button-outline" onClick={logout} disabled={busy}>{c.signOut}</button></div>
+   <div className="admin-sections">{[['servers',c.list],['resources',resourceCopy[language].title]].map(([key,label])=><button key={key} type="button" disabled={busy} aria-pressed={section===key} className={'button '+(section===key?'button-pink':'button-outline')} onClick={()=>{if(section!==key&&discard()){replaceDraft(empty());setEditorOpen(false);setResourceEditor(null);setNotice(null);setSection(key);}}}>{label}</button>)}</div>
+   {section==='resources'?<PrivateResources session={session} editor={resourceEditor} setEditor={setResourceEditor} fail={fail} setNotice={setNotice} busy={busy} setBusy={setBusy} discard={discard}/>:<>
    <dl className="admin-stats">{[[d.total,servers.length],[d.visible,servers.filter(s=>s.published).length],[d.hidden,servers.filter(s=>!s.published).length],[d.promoted,servers.filter(s=>s.promoted).length]].map(([label,count])=><div key={label}><dt>{label}</dt><dd>{loaded?count:'—'}</dd></div>)}</dl>
    <div className="admin-workspace"><form hidden={!editorOpen} className="admin-box admin-editor" onSubmit={save}>
     <div className="admin-list-heading"><h2>{draft.id?c.edit:c.new}</h2><button type="button" className="admin-cancel" disabled={busy} onClick={closeEditor}>{c.cancel}</button></div><fieldset disabled={busy}>
@@ -154,7 +158,7 @@ export default function Admin() {
      <button className="button button-pink" type="submit" disabled={featureError}>{busy?c.busy:c.save}</button><button className="admin-cancel" type="button" onClick={closeEditor}>{c.cancel}</button>
     </fieldset></form>
     <section hidden={editorOpen} className="admin-box admin-list-panel" aria-labelledby="admin-list-title"><div className="admin-list-heading"><h2 id="admin-list-title" ref={listTitleRef} tabIndex="-1">{c.list}</h2><button type="button" className="button button-pink" disabled={busy} onClick={newListing}>＋ {c.new}</button><button type="button" className="admin-cancel" onClick={()=>setRefresh(v=>v+1)} disabled={busy||loading}>{c.refresh}</button></div><div className="admin-filters"><label htmlFor="admin-search">{d.search}<input id="admin-search" type="search" value={query} onChange={e=>setQuery(e.target.value)}/></label><label htmlFor="admin-filter-category">{c.category}<select id="admin-filter-category" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">{d.category}</option>{CATEGORIES.map(value=><option key={value} value={value}>{CATEGORY_LABELS[value]}</option>)}</select></label><label htmlFor="admin-filter-status">{d.status}<select id="admin-filter-status" value={status} onChange={e=>setStatus(e.target.value)}>{["all","visible","hidden","promoted"].map(value=><option key={value} value={value}>{d[value]}</option>)}</select></label></div><p className="admin-results" role="status">{loading?d.loading:loaded?filteredServers.length+" "+d.results:"—"}</p>{(query||category!=="all"||status!=="all")&&<button type="button" className="admin-cancel" onClick={()=>{setQuery("");setCategory("all");setStatus("all");}}>{d.reset}</button>}{!loaded?null:filteredServers.length===0?<p className="admin-empty">{servers.length===0?c.none:d.noResults}</p>:<ul className="admin-server-list">{page.items.map(server=><li key={server.id}><div><h3>{server.name}</h3><p>{CATEGORY_LABELS[server.category]} · {server.promoted?c.paid:c.free}{!server.published?` · ${c.hidden}`:''}</p></div><div className="admin-row-actions"><button type="button" className="button button-outline" disabled={busy} onClick={()=>edit(server)} aria-label={`${c.editButton}: ${server.name}`}>{c.editButton}</button><button type="button" className="button admin-delete" disabled={busy} onClick={event=>{deleteTriggerRef.current=event.currentTarget;setDeleteTarget(server);}} aria-label={`${c.remove}: ${server.name}`}>{c.remove}</button></div></li>)}</ul>}<Pagination result={page} disabled={busy||loading} onChange={value=>{setPageNumber(value);listTitleRef.current?.focus();listTitleRef.current?.scrollIntoView({block:"start"});}}/></section>
-   </div>
+   </div></>}
   </>}
   <dialog ref={dialogRef} className="admin-delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-description" onCancel={event=>{event.preventDefault();cancelDeletion();}}>
    <h2 id="delete-title">{c.confirmTitle}</h2><p className="admin-delete-name">{deleteTarget?.name}</p><p id="delete-description">{c.confirmText}</p><div className="admin-dialog-actions"><button ref={cancelRef} type="button" className="button button-outline" disabled={busy} onClick={cancelDeletion}>{c.keep}</button><button type="button" className="button admin-delete" disabled={busy||!session} onClick={removeServer}>{busy?c.busy:c.confirmDelete}</button></div>
