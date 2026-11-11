@@ -1,6 +1,7 @@
 import PrivateResources,{resourceCopy} from './PrivateResources.jsx';
 import {useEffect,useRef,useState,useMemo} from 'react';
 import {useLanguage} from './i18n';
+import {useLocation,useNavigate} from 'react-router-dom';
 import {SectionLink} from './navigation';
 import {api,API_BASE} from './api.mjs';
 import {CATEGORIES,CATEGORY_LABELS,emptyServerDetails,filterServers} from './server-model.mjs';
@@ -35,7 +36,9 @@ export default function Admin() {
  const {language}=useLanguage(),c={...messages[language],...deletionMessages[language],...editorCopy[language]},p=profileEditorCopy[language];
  const [session,setSession]=useState(null),[username,setUsername]=useState(''),[password,setPassword]=useState('');
  const [servers,setServers]=useState([]),[draft,setDraft]=useState(empty),[busy,setBusy]=useState(false),[notice,setNotice]=useState(null),[refresh,setRefresh]=useState(0);
- const [section,setSection]=useState('servers'),[resourceEditor,setResourceEditor]=useState(null);
+ const navigate=useNavigate();
+ const section=useLocation().pathname.replace(/\/$/,'')==='/admin/recursos'?'resources':'servers';
+ const [resourceEditor,setResourceEditor]=useState(null);
  const nameRef=useRef(null);
  const [editorOpen,setEditorOpen]=useState(false),[pageNumber,setPageNumber]=useState(1);
  useEffect(()=>{if(editorOpen&&session)nameRef.current?.focus();},[editorOpen,session]);
@@ -103,12 +106,12 @@ export default function Admin() {
   return()=>clearTimeout(timeout);
  },[session,language]);
  useEffect(()=>{
-  if(!session)return;
+  if(!session||section!=='servers')return;
   const controller=new AbortController();
   setLoading(true);
   api('/admin/servers',{token:session.token,signal:controller.signal}).then(data=>{if(!controller.signal.aborted){setServers(data.servers);setLoaded(true);}}).catch(error=>{if(error.name!=='AbortError')fail(error);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});
   return()=>controller.abort();
- },[session,refresh]);
+ },[session,refresh,section]);
  async function login(event){
   event.preventDefault();setBusy(true);setNotice(null);
   try{const nextSession=await api('/admin/login',{method:'POST',body:JSON.stringify({username,password})});setServers([]);setLoaded(false);setQuery('');setStatus('all');setCategory('all');setSession(nextSession);}
@@ -116,7 +119,7 @@ export default function Admin() {
  }
  async function logout(){
   if(!discard())return;
-  const token=session.token;setResourceEditor(null);setSection("servers");
+  const token=session.token;setResourceEditor(null);navigate('/admin/',{replace:true});
   setSession(null);setServers([]);setNotice(null);setEditorOpen(false);replaceDraft(empty());setBusy(true);
   try{await api('/admin/logout',{method:'POST',token});}
   catch{setNotice({error:true,text:c.logout_failed});}finally{setBusy(false);}
@@ -132,14 +135,14 @@ export default function Admin() {
  function detailField(key,value){setDraft(current=>({...current,details:{...current.details,[key]:value}}));}
  function edit(server){if(!discard())return;setEditorOpen(true);replaceDraft({...server,details:{...emptyServerDetails(),...server.details}});setNotice(null);nameRef.current?.focus();nameRef.current?.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
  return <main id="contenido" className="admin-page shell">
-  <div className="admin-heading"><div><p className="eyebrow">NETLORE / ADMIN</p><h1>{c.title}</h1><p className="admin-intro">{d.intro}</p></div><SectionLink className="button button-outline" to="/servidores/">{c.public} ↗</SectionLink></div>
+  <div className="admin-heading"><div><p className="eyebrow">NETLORE / ADMIN</p><h1>{section==='resources'?resourceCopy[language].title:c.title}</h1><p className="admin-intro">{section==='resources'?resourceCopy[language].intro:d.intro}</p></div><SectionLink className="button button-outline" to="/servidores/">{c.public} ↗</SectionLink></div>
   {/^http:\/\/127\.0\.0\.1(?::\d+)?$/.test(API_BASE)&&<p className="admin-notice" role="note">{localPreviewCopy[language]}</p>}
   {!API_BASE&&<p role="alert">{c.not_configured}</p>}
   {!session&&dirty&&<p className="admin-notice" role="status">{c.retained}</p>}
   {notice&&<p className={`admin-notice ${notice.error?'is-error':''}`} role={notice.error?'alert':'status'}>{notice.text}</p>}
   {!session?<form className="admin-login admin-box" onSubmit={login}><h2>{c.login}</h2><label htmlFor="admin-user">{c.user}</label><input id="admin-user" name="username" autoComplete="username" maxLength="128" required value={username} onChange={e=>setUsername(e.target.value)}/><label htmlFor="admin-password">{c.password}</label><input id="admin-password" name="password" type="password" autoComplete="current-password" maxLength="512" required value={password} onChange={e=>setPassword(e.target.value)}/><button className="button button-pink" type="submit" disabled={busy||!API_BASE}>{busy?c.busy:c.signIn}</button></form>:<>
    <div className="admin-session"><p>{c.session}</p><button type="button" className="button button-outline" onClick={logout} disabled={busy}>{c.signOut}</button></div>
-   <div className="admin-sections">{[['servers',c.list],['resources',resourceCopy[language].title]].map(([key,label])=><button key={key} type="button" disabled={busy} aria-pressed={section===key} className={'button '+(section===key?'button-pink':'button-outline')} onClick={()=>{if(section!==key&&discard()){replaceDraft(empty());setEditorOpen(false);setResourceEditor(null);setNotice(null);setSection(key);}}}>{label}</button>)}</div>
+   <div className="admin-sections">{[['servers',c.list],['resources',resourceCopy[language].title]].map(([key,label])=><button key={key} type="button" disabled={busy} aria-pressed={section===key} className={'button '+(section===key?'button-pink':'button-outline')} onClick={()=>{if(section!==key&&discard()){replaceDraft(empty());setEditorOpen(false);setResourceEditor(null);setNotice(null);navigate(key==='resources'?'/admin/recursos/':'/admin/');}}}>{label}</button>)}</div>
    {section==='resources'?<PrivateResources session={session} editor={resourceEditor} setEditor={setResourceEditor} fail={fail} setNotice={setNotice} busy={busy} setBusy={setBusy} discard={discard}/>:<>
    <dl className="admin-stats">{[[d.total,servers.length],[d.visible,servers.filter(s=>s.published).length],[d.hidden,servers.filter(s=>!s.published).length],[d.promoted,servers.filter(s=>s.promoted).length]].map(([label,count])=><div key={label}><dt>{label}</dt><dd>{loaded?count:'—'}</dd></div>)}</dl>
    <div className="admin-workspace"><form hidden={!editorOpen} className="admin-box admin-editor" onSubmit={save}>

@@ -10,7 +10,7 @@ test('metadata works at a project path and at a hosting root without indexing ad
    assert.ok(output.includes(`content="${base}assets/netlore-logo.png"`));
    assert.ok(!output.includes('noindex'));
   }
-  assert.match(metadataHtml(html,'admin',base),/noindex, nofollow/);
+  for(const route of ['admin','admin/recursos'])assert.match(metadataHtml(html,route,base),/noindex, nofollow/);
  }
 });
 test('route titles remain localized after client navigation',()=>{

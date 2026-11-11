@@ -212,7 +212,7 @@ export default function App() {
     <NavigationEffects />
     <button className="skip-link" type="button" onClick={() => scrollToSection('contenido', true)}>{t.skip}</button>
     <Header />
-    <Suspense fallback={<main id="contenido" className="shell" aria-busy="true"><p role="status">NetLore…</p></main>}><Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/pase/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/admin/" element={<Admin />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes></Suspense>
+    <Suspense fallback={<main id="contenido" className="shell" aria-busy="true"><p role="status">NetLore…</p></main>}><Routes><Route path="/" element={<Portal />} /><Route path="/servidores/" element={<Portal />} /><Route path="/promocion/" element={<Portal />} /><Route path="/informacion/" element={<Portal />} /><Route path="/pase/" element={<Portal />} /><Route path="/index.html" element={<Portal />} /><Route path="/admin/recursos?" element={<Admin />} /><Route path="/privacidad/" element={<PrivacyPage />} /><Route path="/cookies/" element={<CookiesPage onClearPreferences={clearPreferences} />} /><Route path="*" element={<NotFound />} /></Routes></Suspense>
     <Footer onOpenNotice={openNotice} noticeTriggerRef={noticeTriggerRef} />
     {noticeVisible && <PrivacyNotice onDismiss={dismissNotice} focusOnOpen={focusNotice} returnFocusRef={noticeTriggerRef} />}
   </div>;

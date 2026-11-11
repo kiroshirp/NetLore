@@ -17,7 +17,7 @@ function staticRoutes() {
       const html = await readFile(resolve(outputDirectory, 'index.html'), 'utf8');
       const siteUrl=process.env.NETLORE_SITE_URL||'https://kiroshirp.github.io/NetLore/';
       await writeFile(resolve(outputDirectory,'index.html'),metadataHtml(html,'',siteUrl));
-      for (const route of [...publicRoutes,'admin']) {
+      for (const route of [...publicRoutes,'admin','admin/recursos']) {
         const directory = resolve(outputDirectory, route);
         await mkdir(directory, { recursive: true });
         await writeFile(resolve(directory, 'index.html'), metadataHtml(html,route,siteUrl));

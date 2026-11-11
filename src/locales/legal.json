@@ -58,7 +58,7 @@
       ]
     },
     "providersTitle": "Servicios externos y transferencias",
-    "providersDescription": "GitHub Pages aloja esta web y registra direcciones IP por seguridad, según su documentación. Cloudflare presta la API y el almacenamiento de las fichas y del acceso administrativo, y procesa las conexiones a esos servicios. Discord se utiliza para los tickets y Stripe es el proveedor de pagos previsto. Sus políticas describen tratamientos fuera del Espacio Económico Europeo y las garantías aplicables, como decisiones de adecuación o cláusulas contractuales tipo, según el caso. Consulta la información de cada servicio:",
+    "providersDescription": "GitHub Pages aloja esta web y registra direcciones IP por seguridad, según su documentación. Cloudflare también aloja la web en netlore.pages.dev, presta la API y el almacenamiento de las fichas y del acceso administrativo, y procesa las conexiones a esos servicios. Discord se utiliza para los tickets y Stripe es el proveedor de pagos previsto. Sus políticas describen tratamientos fuera del Espacio Económico Europeo y las garantías aplicables, como decisiones de adecuación o cláusulas contractuales tipo, según el caso. Consulta la información de cada servicio:",
     "rightsTitle": "Tus derechos",
     "rights": "Puedes solicitar acceso, rectificación, supresión, oposición, limitación y, cuando corresponda, portabilidad, escribiendo al contacto indicado. Especifica tu solicitud y los datos necesarios para localizarla; no adjuntes documentos de identidad de forma preventiva.",
     "complaint": "También puedes presentar una reclamación ante la",
@@ -148,7 +148,7 @@
       ]
     },
     "providersTitle": "External services and transfers",
-    "providersDescription": "GitHub Pages hosts this website and logs IP addresses for security, according to its documentation. Cloudflare provides the API and storage for listings and administrative access, and processes connections to those services. Discord is used for tickets and Stripe is the planned payment provider. Their policies describe processing outside the European Economic Area and applicable safeguards, such as adequacy decisions or standard contractual clauses, as appropriate. Read each service’s information:",
+    "providersDescription": "GitHub Pages hosts this website and logs IP addresses for security, according to its documentation. Cloudflare also hosts the site at netlore.pages.dev, provides the API and storage for listings and administrative access, and processes connections to those services. Discord is used for tickets and Stripe is the planned payment provider. Their policies describe processing outside the European Economic Area and applicable safeguards, such as adequacy decisions or standard contractual clauses, as appropriate. Read each service’s information:",
     "rightsTitle": "Your rights",
     "rights": "You can request access, rectification, erasure, objection, restriction and, where applicable, portability by writing to the contact provided. Explain your request and provide the information needed to locate it; do not attach identity documents pre-emptively.",
     "complaint": "You can also lodge a complaint with the",
@@ -238,7 +238,7 @@
       ]
     },
     "providersTitle": "Services externes et transferts",
-    "providersDescription": "GitHub Pages héberge ce site et enregistre les adresses IP pour la sécurité, selon sa documentation. Cloudflare fournit l’API et le stockage des fiches et de l’accès administratif, et traite les connexions à ces services. Discord est utilisé pour les tickets et Stripe est le prestataire de paiement prévu. Leurs politiques décrivent des traitements hors de l’Espace économique européen et les garanties applicables, comme des décisions d’adéquation ou des clauses contractuelles types, selon le cas. Consulte les informations de chaque service :",
+    "providersDescription": "GitHub Pages héberge ce site et enregistre les adresses IP pour la sécurité, selon sa documentation. Cloudflare héberge également le site sur netlore.pages.dev, fournit l’API et le stockage des fiches et de l’accès administratif, et traite les connexions à ces services. Discord est utilisé pour les tickets et Stripe est le prestataire de paiement prévu. Leurs politiques décrivent des traitements hors de l’Espace économique européen et les garanties applicables, comme des décisions d’adéquation ou des clauses contractuelles types, selon le cas. Consulte les informations de chaque service :",
     "rightsTitle": "Tes droits",
     "rights": "Tu peux demander l’accès, la rectification, l’effacement, l’opposition, la limitation et, le cas échéant, la portabilité en écrivant au contact indiqué. Précise ta demande et les informations nécessaires pour la retrouver ; ne joins pas de document d’identité de façon préventive.",
     "complaint": "Tu peux aussi adresser une réclamation à l’",
