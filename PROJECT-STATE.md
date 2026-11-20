@@ -36,3 +36,10 @@
 - Contraste medido (OKLCH a sRGB): todos los pares de texto de la interfaz ≥ 4,5:1 tras subir `--color-muted` a L 78 %. Emulación Playwright de iPhone SE/13, Pixel 7, Galaxy S9+ e iPad Mini en es/fr: sin desbordamiento horizontal en las 5 rutas. Son emulaciones, no dispositivos reales.
 - Sin comprobar: admin con datos reales (solo con API simulada), render del linter (sin puppeteer-core), producción tras el despliegue.
 - Pendiente y bloqueado por decisiones o credenciales: imagen por ficha (campo D1 + almacenamiento), pestaña «Próximamente» (fechas reales), estado del servidor (fuente real), paginación y búsqueda en SQL, copias de D1 y registro del admin. Todo cambio de Worker/D1 lo despliega el propietario con sus credenciales.
+
+## Despliegue y base técnica 20/11
+- Desplegado en main (50fafd6): GitHub Pages y Cloudflare Pages terminaron con éxito en Actions. No pude comprobar las URLs en vivo (el proxy de este entorno las bloquea): revisar visualmente netlore.pages.dev y la CSP.
+- Lighthouse local (preview, API sin red): móvil rendimiento 99, accesibilidad 100, buenas prácticas 96 (el error de consola es la API bloqueada en el entorno), SEO 100.
+- En rama, aún sin desplegar: robots.txt, precarga del fondo, pestaña «Preguntas». Worker: paginación SQL opcional y registro de auditoría con migración 0004, con pruebas (49 en total). Ver worker/OPERATIONS.md. La interfaz no usa la paginación SQL todavía.
+- `npm run test:visual` (Playwright, requiere build y navegador): 15 páginas, sin desbordes, un h1, sin imágenes rotas.
+- «Próximamente», imagen por ficha y estado del servidor: aplazados por decisión del propietario o falta de fuente real.

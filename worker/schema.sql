@@ -31,3 +31,12 @@ CREATE TABLE IF NOT EXISTS private_resources (
  url TEXT NOT NULL,
  revision INTEGER NOT NULL DEFAULT 1
 );
+CREATE TABLE IF NOT EXISTS audit_log (
+ id INTEGER PRIMARY KEY AUTOINCREMENT,
+ at INTEGER NOT NULL,
+ action TEXT NOT NULL,
+ target_type TEXT NOT NULL,
+ target_id TEXT NOT NULL DEFAULT '',
+ summary TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS audit_log_at ON audit_log(at);

@@ -1,4 +1,4 @@
-import { validateServer, validateServerDetails } from '../src/server-model.mjs';
+import { CATEGORIES, validateServer, validateServerDetails } from '../src/server-model.mjs';
 
 const encoder = new TextEncoder();
 const hex = buffer => [...new Uint8Array(buffer)].map(n=>n.toString(16).padStart(2,'0')).join('');
@@ -18,10 +18,46 @@ async function body(request) {
  const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
  try{const input=JSON.parse(new TextDecoder().decode(bytes));if(!input||typeof input!=='object'||Array.isArray(input))throw new Error();return input;}catch{throw new Error('invalid_body');}
 }
+// Administrative actions are recorded without credentials, tokens or IPs. The
+// log is best effort: a missing table must never block an edit or a login.
+async function audit(env,action,type,id='',summary='') {
+ try{await env.DB.prepare('INSERT INTO audit_log(at,action,target_type,target_id,summary) VALUES(?,?,?,?,?)').bind(Math.floor(Date.now()/1000),action,type,String(id).slice(0,64),String(summary).slice(0,120)).run();}catch{/* migration 0004 may not be applied yet */}
+}
+// Optional pagination for GET /servers. Without these parameters the response is
+// the complete cached list, exactly as before. Search is ASCII case-insensitive
+// and accent-sensitive (SQLite LIKE); the browser filter remains accent-insensitive.
+function listOptions(url) {
+ const p=url.searchParams;
+ if(!['page','pageSize','category','scope','q'].some(key=>p.has(key)))return null;
+ const number=(value,fallback,max)=>Math.min(max,Math.max(1,Number.parseInt(value,10)||fallback));
+ return {
+  pageSize:number(p.get('pageSize'),12,50),page:number(p.get('page'),1,10000),
+  category:CATEGORIES.includes(p.get('category'))?p.get('category'):'all',
+  scope:['promoted','free'].includes(p.get('scope'))?p.get('scope'):'all',
+  q:(p.get('q')||'').trim().slice(0,60)
+ };
+}
+async function listServers(db,{page,pageSize,category,scope,q}) {
+ const where=['published=1'],values=[];
+ if(category!=='all'){where.push('category=?');values.push(category);}
+ for(const word of q.split(/\s+/).filter(Boolean).slice(0,5)){
+  where.push("(name LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\' OR details LIKE ? ESCAPE '\\')");
+  const like=`%${word.replace(/[\\%_]/g,'\\$&')}%`;values.push(like,like,like);
+ }
+ const base=where.join(' AND ');
+ const groups=(await db.prepare(`SELECT promoted,COUNT(*) AS total FROM servers WHERE ${base} GROUP BY promoted`).bind(...values).all()).results;
+ const counts={promoted:0,free:0};for(const row of groups)counts[row.promoted?'promoted':'free']=row.total;
+ counts.all=counts.promoted+counts.free;
+ const total=counts[scope],pages=Math.max(1,Math.ceil(total/pageSize)),current=Math.min(page,pages);
+ const scoped=scope==='all'?base:`${base} AND promoted=${scope==='promoted'?1:0}`;
+ const {results}=await db.prepare(`SELECT id,name,description,category,url,promoted,details FROM servers WHERE ${scoped} ORDER BY promoted DESC,name COLLATE NOCASE,id LIMIT ? OFFSET ?`).bind(...values,pageSize,(current-1)*pageSize).all();
+ return {servers:results.map(publicServer),pagination:{page:current,pages,pageSize,total},counts};
+}
 export default {
  async scheduled(event,env) {
   const now=Math.floor(event.scheduledTime/1000);
   await env.DB.batch([env.DB.prepare('DELETE FROM sessions WHERE expires_at<=?').bind(now),env.DB.prepare('DELETE FROM login_limits WHERE expires_at<=?').bind(now)]);
+  try{await env.DB.prepare('DELETE FROM audit_log WHERE at<=?').bind(now-15552000).run();}catch{/* optional table */}
  },
  async fetch(request,env) {
   const origin=request.headers.get('Origin');
@@ -42,6 +78,8 @@ export default {
      const {success}=await env.PUBLIC_RATE_LIMITER.limit({key:ip});
      if(!success){headers['Retry-After']='10';return reply({error:'rate_limited'},429);}
     }
+    const list=listOptions(new URL(request.url));
+    if(list)return reply(await listServers(env.DB,list));
     // Query strings and Origin cannot create unbounded cache variants. CORS is
     // added per response, never stored with the shared public JSON.
     const cache=globalThis.caches?.default;
@@ -71,6 +109,7 @@ export default {
      env.DB.prepare('DELETE FROM login_limits WHERE expires_at<=? OR key=?').bind(now,key),
      env.DB.prepare('INSERT INTO sessions(token_hash,auth_version,expires_at) VALUES(?,?,?)').bind(await digest(token),env.ADMIN_PASSWORD_HASH,now+3600)
     ]);
+    await audit(env,'login','session');
     return reply({token,expiresAt:now+3600});
    }
    const authorization=request.headers.get('Authorization')||'';
@@ -90,7 +129,11 @@ export default {
     const fields=[input.name.trim(),category,status,input.description.trim(),url];
     if(resource&&(!Number.isSafeInteger(input.revision)||input.revision<1))return reply({error:'invalid_resource'},400);
     const row=resource?await env.DB.prepare('UPDATE private_resources SET name=?,category=?,status=?,description=?,url=?,revision=revision+1 WHERE id=? AND revision=? RETURNING *').bind(...fields,resource[1],input.revision).first():await env.DB.prepare('INSERT INTO private_resources(name,category,status,description,url,id) VALUES(?,?,?,?,?,?) RETURNING *').bind(...fields,crypto.randomUUID()).first();
+    if(row)await audit(env,resource?'update':'create','resource',row.id,row.name);
     return row?reply({resource:row},resource?200:201):reply({error:'conflict'},409);
+   }
+   if(path==='/admin/audit'&&request.method==='GET'){
+    try{const {results}=await env.DB.prepare('SELECT id,at,action,target_type,target_id,summary FROM audit_log ORDER BY id DESC LIMIT 100').all();return reply({entries:results});}catch{return reply({entries:[]});}
    }
    if(path==='/admin/logout'&&request.method==='POST') {await env.DB.prepare('DELETE FROM sessions WHERE token_hash=?').bind(tokenHash).run();return reply({ok:true});}
    if(path==='/admin/servers'&&request.method==='GET') {
@@ -98,19 +141,21 @@ export default {
    }
    if(path==='/admin/servers'&&request.method==='POST') {
     const value=validateServer(await body(request)),id=crypto.randomUUID();
-    const row=await env.DB.prepare('INSERT INTO servers(id,name,description,category,url,promoted,published,details,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?) RETURNING *').bind(id,value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),JSON.stringify(value.details),now,now).first();return reply({server:adminServer(row)},201);
+    const row=await env.DB.prepare('INSERT INTO servers(id,name,description,category,url,promoted,published,details,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?) RETURNING *').bind(id,value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),JSON.stringify(value.details),now,now).first();await audit(env,'create','server',row.id,row.name);return reply({server:adminServer(row)},201);
    }
    const match=path.match(/^\/admin\/servers\/([a-f0-9-]{36})$/);
    if(match&&request.method==='DELETE') {
     const input=await body(request);
     if(!Number.isSafeInteger(input.revision)||input.revision<1)return reply({error:'invalid_server'},400);
     const deleted=await env.DB.prepare('DELETE FROM servers WHERE id=? AND revision=? RETURNING id').bind(match[1],input.revision).first();
+    if(deleted)await audit(env,'delete','server',deleted.id);
     return deleted?reply({deletedId:deleted.id}):reply({error:'conflict'},409);
    }
    if(match&&request.method==='PUT') {
     const input=await body(request),value=validateServer(input);
     if(!Number.isSafeInteger(input.revision)||input.revision<1)return reply({error:'invalid_server'},400);
     const row=await env.DB.prepare('UPDATE servers SET name=?,description=?,category=?,url=?,promoted=?,published=?,details=?,revision=revision+1,updated_at=? WHERE id=? AND revision=? RETURNING *').bind(value.name,value.description,value.category,value.url,Number(value.promoted),Number(value.published),JSON.stringify(value.details),now,match[1],input.revision).first();
+    if(row)await audit(env,'update','server',row.id,row.name);
     return row?reply({server:adminServer(row)}):reply({error:'conflict'},409);
    }
    return reply({error:'not_found'},404);
