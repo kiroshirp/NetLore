@@ -13,7 +13,7 @@ export function metadataHtml(html,route,siteUrl){
  const title=pageTitle(route);
  const url=new URL(route?`${route}/`:'',siteUrl.endsWith('/')?siteUrl:siteUrl+'/').href;
  const description=html.match(/<meta name="description" content="([^"]*)"/)?.[1]||'';
- const image=new URL('assets/netlore-logo.png',siteUrl.endsWith('/')?siteUrl:siteUrl+'/').href;
+ const image=new URL('assets/netlore-share.png',siteUrl.endsWith('/')?siteUrl:siteUrl+'/').href;
  return html.replace(/<title>.*?<\/title>/,`<title>${escape(title)}</title>`).replace('</head>',[
   `<link rel="canonical" href="${escape(url)}" />`,
   `<meta property="og:type" content="website" />`,
@@ -21,6 +21,9 @@ export function metadataHtml(html,route,siteUrl){
   `<meta property="og:description" content="${description}" />`,
   `<meta property="og:url" content="${escape(url)}" />`,
   `<meta property="og:image" content="${escape(image)}" />`,
+  `<meta property="og:image:width" content="1200" />`,
+  `<meta property="og:image:height" content="630" />`,
+  `<meta name="twitter:card" content="summary_large_image" />`,
   ...((route==='admin'||route.startsWith('admin/'))?['<meta name="robots" content="noindex, nofollow" />']:[]),
   '</head>'
  ].join('\n'));

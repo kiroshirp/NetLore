@@ -42,7 +42,7 @@ export function Launcher({ directory, promotion, questions, citizen, hero }) {
     : active === '/pase/' ? citizen
     : directory;
   return <main id="contenido" className={`launcher ${home ? 'launcher-home' : 'launcher-detail'}`}>
-    <img className="launcher-backdrop" src={asset('netlore-city-1672.webp')} srcSet={[768, 1280, 1672].map((width) => `${asset(`netlore-city-${width}.webp`)} ${width}w`).join(', ')} sizes="100vw" width="1672" height="941" alt="" fetchPriority="high" />
+    <img className="launcher-backdrop" src={asset('netlore-city-gold-1672.webp')} srcSet={[768, 1280, 1672].map((width) => `${asset(`netlore-city-gold-${width}.webp`)} ${width}w`).join(', ')} sizes="100vw" width="1672" height="941" alt="" fetchPriority="high" />
     <div className="launcher-shade" aria-hidden="true" />
     {!home && <h1 className="sr-only">{tabs.find((tab) => tab.to === pathname)?.label}</h1>}
     <div className="launcher-inner shell">

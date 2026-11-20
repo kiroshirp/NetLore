@@ -7,7 +7,7 @@ test('metadata works at a project path and at a hosting root without indexing ad
   for(const route of publicRoutes){
    const output=metadataHtml(html,route,base);
    assert.ok(output.includes(`href="${base}${route}/"`));
-   assert.ok(output.includes(`content="${base}assets/netlore-logo.png"`));
+   assert.ok(output.includes(`content="${base}assets/netlore-share.png"`));
    assert.ok(!output.includes('noindex'));
   }
   for(const route of ['admin','admin/recursos'])assert.match(metadataHtml(html,route,base),/noindex, nofollow/);

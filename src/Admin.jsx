@@ -135,7 +135,7 @@ export default function Admin() {
  function detailField(key,value){setDraft(current=>({...current,details:{...current.details,[key]:value}}));}
  function edit(server){if(!discard())return;setEditorOpen(true);replaceDraft({...server,details:{...emptyServerDetails(),...server.details}});setNotice(null);nameRef.current?.focus();nameRef.current?.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
  return <main id="contenido" className="admin-page shell">
-  <div className="admin-heading"><div><p className="eyebrow">NETLORE / ADMIN</p><h1>{section==='resources'?resourceCopy[language].title:c.title}</h1><p className="admin-intro">{section==='resources'?resourceCopy[language].intro:d.intro}</p></div><SectionLink className="button button-outline" to="/servidores/">{c.public} ↗</SectionLink></div>
+  <div className="admin-heading"><div><h1>{section==='resources'?resourceCopy[language].title:c.title}</h1><p className="admin-intro">{section==='resources'?resourceCopy[language].intro:d.intro}</p></div><SectionLink className="button button-outline" to="/servidores/">{c.public} ↗</SectionLink></div>
   {/^http:\/\/127\.0\.0\.1(?::\d+)?$/.test(API_BASE)&&<p className="admin-notice" role="note">{localPreviewCopy[language]}</p>}
   {!API_BASE&&<p role="alert">{c.not_configured}</p>}
   {!session&&dirty&&<p className="admin-notice" role="status">{c.retained}</p>}

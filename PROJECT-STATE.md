@@ -30,3 +30,9 @@
 - Retirado por decisión del propietario: mapa interactivo (arrastre, zoom, rueda), `map-wheel.mjs` y su prueba. Texto de promoción: «borde dorado». Tipografía Albert Sans autoalojada (@fontsource-variable, compatible con CSP).
 - Verificado en local: 46 pruebas y build; capturas Chromium a 1280, 820 y 390 px con fichas simuladas en el navegador (no tocan datos reales). Sloplint estático 0 FAIL; falta la capa de render (sin puppeteer-core).
 - Sin comprobar: admin con el tema nuevo (solo recoloreado automáticamente), navegador real y móviles reales, contraste medido. Nada desplegado: GitHub Pages depende de main y Cloudflare Pages es manual.
+
+## Cierre del rediseño 20/11 (rama claude/modest-archimedes-3usxwo)
+- Hecho y verificado en local: logo, fondos y og:image dorados propios (`netlore-logo-gold`, `netlore-city-gold-*`, `netlore-share.png`, 1200x630; la prueba de metadatos se actualizó al nuevo nombre); admin rehecho en CSS plano con tokens; esqueletos de carga; fila «Aparece aquí» fija al pie en Inicio; atajo `/` y Ctrl/Cmd+K para buscar; paginación sin guiones ni flechas de texto; objetivos táctiles de 44 px en táctil.
+- Contraste medido (OKLCH a sRGB): todos los pares de texto de la interfaz ≥ 4,5:1 tras subir `--color-muted` a L 78 %. Emulación Playwright de iPhone SE/13, Pixel 7, Galaxy S9+ e iPad Mini en es/fr: sin desbordamiento horizontal en las 5 rutas. Son emulaciones, no dispositivos reales.
+- Sin comprobar: admin con datos reales (solo con API simulada), render del linter (sin puppeteer-core), producción tras el despliegue.
+- Pendiente y bloqueado por decisiones o credenciales: imagen por ficha (campo D1 + almacenamiento), pestaña «Próximamente» (fechas reales), estado del servidor (fuente real), paginación y búsqueda en SQL, copias de D1 y registro del admin. Todo cambio de Worker/D1 lo despliega el propietario con sus credenciales.

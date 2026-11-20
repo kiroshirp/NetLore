@@ -25,8 +25,8 @@ em { font-style: normal; }
 /* Header */
 .site-header { position: sticky; top: 0; z-index: var(--z-sticky-nav); background: color-mix(in oklab, var(--color-paper) 94%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--color-rule); }
 .header-inner { display: flex; align-items: center; gap: 28px; min-height: 76px; }
-.brand { display: block; flex: 0 0 168px; height: 42px; overflow: hidden; position: relative; border-radius: var(--radius-control); }
-.brand img { position: absolute; width: 232px; max-width: none; height: auto; left: -32px; top: -22px; mix-blend-mode: screen; filter: hue-rotate(112deg) saturate(1.1); }
+.brand { display: block; flex: 0 0 168px; height: 44px; overflow: hidden; position: relative; border-radius: var(--radius-control); }
+.brand img { position: absolute; width: 232px; max-width: none; height: auto; left: -32px; top: -22px; mix-blend-mode: screen; }
 nav { display: flex; gap: 28px; margin-left: var(--space-lg); font-size: var(--text-sm); font-weight: 500; }
 nav a { position: relative; display: inline-flex; align-items: center; min-height: 44px; color: var(--color-ink-2); text-decoration: none; transition: color var(--dur-micro) var(--ease-out); }
 nav a:hover, nav a[aria-current] { color: var(--color-ink); }
@@ -42,7 +42,7 @@ nav a[aria-current]::after { content: ""; position: absolute; left: 0; right: 0;
 .button-gold:hover { background: var(--color-accent-hi); }
 .button-outline { background: transparent; border-color: var(--color-rule-2); color: var(--color-ink); }
 .button-outline:hover { background: var(--color-paper-3); border-color: var(--color-accent); }
-.button:disabled { opacity: .5; cursor: not-allowed; }
+.button:disabled { background: var(--color-paper-3); border-color: var(--color-rule); color: var(--color-muted); cursor: not-allowed; }
 .button > span[aria-hidden] { font-size: 18px; font-weight: 400; }
 .icon { display: inline-flex; align-items: center; }
 .header-action { min-height: 44px; padding: var(--space-sm) var(--space-md); }
@@ -179,3 +179,5 @@ nav a[aria-current]::after { content: ""; position: absolute; left: 0; right: 0;
   .legal-identity > div { grid-template-columns: 1fr; gap: var(--space-3xs); }
   .storage-inventory { grid-template-columns: 1fr; }
 }
+
+@media (pointer: coarse) { .footer-legal a, .footer-legal button, .footer-bottom a { min-height: 44px; } .questions details a, .request-privacy-note a, .privacy-notice-links a { display: inline-block; padding-block: var(--space-xs); } }

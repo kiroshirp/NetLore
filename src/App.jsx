@@ -30,7 +30,7 @@ function Header() {
   const { pathname } = useLocation();
   return <header className="site-header">
     <div className="header-inner shell">
-      <SectionLink className="brand" to="/" aria-label={t.home}><img src={asset('netlore-logo.webp')} width="768" height="280" alt="NetLore" /></SectionLink>
+      <SectionLink className="brand" to="/" aria-label={t.home}><img src={asset('netlore-logo-gold.webp')} width="768" height="280" alt="NetLore" /></SectionLink>
       <nav aria-label={t.navigation}>
         <SectionLink to="/servidores/" aria-current={pathname === '/servidores/' ? 'location' : undefined}>{t.navServers}</SectionLink>
         <SectionLink to="/promocion/" aria-current={pathname === '/promocion/' ? 'location' : undefined}>{t.navPromotion}</SectionLink>
