@@ -38,7 +38,7 @@ function Header() {
       <div className="language-switch">
         <label className="sr-only" htmlFor="language">{t.language}</label>
         <select id="language" name="language" value={language} onChange={(event) => changeLanguage(event.target.value)}>
-          <option value="es" lang="es" aria-label="Español">Es</option><option value="en" lang="en" aria-label="English">En</option><option value="fr" lang="fr" aria-label="Français">Fr</option>
+          <option value="es" lang="es">Es</option><option value="en" lang="en">En</option><option value="fr" lang="fr">Fr</option>
         </select>
       </div>
       <DiscordLink className="button button-gold header-action" accessibleHint>{t.discordName}</DiscordLink>

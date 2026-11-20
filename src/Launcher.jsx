@@ -7,9 +7,9 @@ import './launcher.css';
 const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
 
 const copy = {
-  es: { tabs: 'Secciones de NetLore', info: 'Información', close: 'Volver al inicio' },
-  en: { tabs: 'NetLore sections', info: 'Information', close: 'Back to start' },
-  fr: { tabs: 'Sections de NetLore', info: 'Informations', close: 'Retour à l’accueil' },
+  es: { tabs: 'Secciones de NetLore', info: 'Preguntas', close: 'Volver al inicio' },
+  en: { tabs: 'NetLore sections', info: 'Questions', close: 'Back to start' },
+  fr: { tabs: 'Sections de NetLore', info: 'Questions', close: 'Retour à l’accueil' },
 };
 
 const icons = {
