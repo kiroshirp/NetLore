@@ -43,3 +43,4 @@
 - En rama, aún sin desplegar: robots.txt, precarga del fondo, pestaña «Preguntas». Worker: paginación SQL opcional y registro de auditoría con migración 0004, con pruebas (49 en total). Ver worker/OPERATIONS.md. La interfaz no usa la paginación SQL todavía.
 - `npm run test:visual` (Playwright, requiere build y navegador): 15 páginas, sin desbordes, un h1, sin imágenes rotas.
 - «Próximamente», imagen por ficha y estado del servidor: aplazados por decisión del propietario o falta de fuente real.
+- 20/11 (main): panel «Actividad reciente» en el admin; muestra aviso si la API aún no tiene /admin/audit. Comprobado solo con API simulada. Worker y migración 0004 siguen sin desplegar.
