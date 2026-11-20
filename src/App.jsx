@@ -8,16 +8,15 @@ const Admin = lazy(() => import('./Admin'));
 import { copyRequestMessage, listingRequestMessage } from './copy-request.mjs';
 import { CookiesPage, PrivacyNotice, PrivacyPage } from './Privacy';
 import { clearNetLorePreferences, NOTICE_KEY, NOTICE_VERSION, readLocal, writeLocal } from './privacy-storage.mjs';
-import { MapPortal } from './MapPortal';
+import { Launcher } from './Launcher';
 const CitizenPass = lazy(() => import('./CitizenPass'));
 
 const discordUrl = 'https://discord.gg/YkKv6X6gQB';
 const asset = (name) => `${import.meta.env.BASE_URL}assets/${name}`;
-const Arrow = ({ children = '↗' }) => <span aria-hidden="true">{children}</span>;
-
-function Eyebrow({ children }) {
-  return <p className="eyebrow"><span className="pink-slash" aria-hidden="true">/</span><span>{children}</span></p>;
-}
+const arrowPaths = { '\u2197': 'M7 17 17 7M8 7h9v9', '\u2192': 'M5 12h14m-6-6 6 6-6 6', '\u2193': 'M12 5v14m-6-6 6 6 6-6', '\u2191': 'M12 19V5m-6 6 6-6 6 6', '\u2199': 'M17 7 7 17m9 0H7V8', '\u21b3': 'M6 5v8h12m-5-5 5 5-5 5', '+': 'M12 5v14M5 12h14', '\u2713': 'm5 13 4 4L19 7', '\u29c9': 'M9 9h10v10H9zM5 15V5h10' };
+const Arrow = ({ children = '\u2197' }) => arrowPaths[children]
+  ? <span aria-hidden="true" className="icon"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={arrowPaths[children]} /></svg></span>
+  : <span aria-hidden="true">{children}</span>;
 
 function DiscordLink({ children, className = '', accessibleHint = false }) {
   const { t } = useLanguage();
@@ -32,7 +31,6 @@ function Header() {
   return <header className="site-header">
     <div className="header-inner shell">
       <SectionLink className="brand" to="/" aria-label={t.home}><img src={asset('netlore-logo.webp')} width="768" height="280" alt="NetLore" /></SectionLink>
-      <span className="brand-caption"><span>{t.brandLine1}</span><br /><span>{t.brandLine2}</span></span>
       <nav aria-label={t.navigation}>
         <SectionLink to="/servidores/" aria-current={pathname === '/servidores/' ? 'location' : undefined}>{t.navServers}</SectionLink>
         <SectionLink to="/promocion/" aria-current={pathname === '/promocion/' ? 'location' : undefined}>{t.navPromotion}</SectionLink>
@@ -40,31 +38,23 @@ function Header() {
       <div className="language-switch">
         <label className="sr-only" htmlFor="language">{t.language}</label>
         <select id="language" name="language" value={language} onChange={(event) => changeLanguage(event.target.value)}>
-          <option value="es" lang="es" aria-label="Español">ES</option><option value="en" lang="en" aria-label="English">EN</option><option value="fr" lang="fr" aria-label="Français">FR</option>
+          <option value="es" lang="es" aria-label="Español">Es</option><option value="en" lang="en" aria-label="English">En</option><option value="fr" lang="fr" aria-label="Français">Fr</option>
         </select>
       </div>
-      <SectionLink className="button button-pink header-action" to="/promocion/"><span>{t.headerPromote}</span><Arrow>↓</Arrow></SectionLink>
+      <DiscordLink className="button button-gold header-action" accessibleHint>{t.discordName}</DiscordLink>
     </div>
   </header>;
 }
 
 function Hero() {
   const { t } = useLanguage();
-  return <section className="hero" aria-labelledby="hero-title">
-    <img className="hero-image" src={asset('netlore-city-1672.webp')} srcSet={[768, 1280, 1672].map((width) => `${asset(`netlore-city-${width}.webp`)} ${width}w`).join(', ')} sizes="100vw" width="1672" height="941" alt="" fetchPriority="high" />
-    <div className="hero-shade" aria-hidden="true" />
-    <div className="hero-inner shell">
-      <div className="hero-copy">
-        <Eyebrow>{t.heroEyebrow}</Eyebrow>
-        <h1 id="hero-title"><span>{t.heroLine1}</span><br /><span>{t.heroLine2}</span>{' '}<em>{t.heroEmphasis}</em></h1>
-        <p className="hero-description">{t.heroDescription2}</p>
-        <div className="hero-actions">
-          <SectionLink className="hero-link" to="/servidores/"><span>{t.explore}</span><Arrow>↓</Arrow></SectionLink>
-          <SectionLink className="hero-offer" to="/promocion/">{t.heroOffer}</SectionLink>
-        </div>
-      </div>
+  return <section className="launcher-hero" id="inicio" aria-labelledby="hero-title">
+    <h1 id="hero-title">{t.heroLine1} {t.heroLine2} {t.heroEmphasis}</h1>
+    <p className="hero-description">{t.heroDescription2}</p>
+    <div className="hero-actions">
+      <SectionLink className="button button-gold" to="/promocion/"><span>{t.headerPromote}</span></SectionLink>
+      <SectionLink className="hero-link" to="/servidores/"><span>{t.explore}</span></SectionLink>
     </div>
-    <div className="hero-foot shell"><span>{t.communityDirectory}</span><span>OPEN2077 <Arrow>↙</Arrow></span></div>
   </section>;
 }
 
@@ -117,7 +107,7 @@ function RequestPromotion({listingType}) {
         <span className="step-number" aria-hidden="true">02</span>
         <div className="request-step-content">
           <h4>{t.discordStep}</h4>
-          <DiscordLink className="button button-pink" accessibleHint>{t.openDiscord}</DiscordLink>
+          <DiscordLink className="button button-gold" accessibleHint>{t.openDiscord}</DiscordLink>
           <p className="discord-note">{t.discordInstructions}</p>
           <RequestPrivacyNote />
         </div>
@@ -136,7 +126,6 @@ function Promotion() {
   const [listingType,setListingType] = useState('free');
   return <section className="promotion shell" id="promocion" aria-labelledby="promotion-title">
     <div className="promotion-copy">
-      <Eyebrow>{t.promotionEyebrow}</Eyebrow>
       <h2 id="promotion-title"><span>{t.promotionLine1}</span><br /><em>{t.promotionLine2}</em></h2>
       <p>{t.promotionDescription}</p>
       <fieldset className="listing-plans"><legend>{t.listingOptionsLegend}</legend>
@@ -167,19 +156,19 @@ function Questions() {
 function Footer({ onOpenNotice, noticeTriggerRef }) {
   const { t, legal } = useLanguage();
   return <footer className="footer shell">
-    <div className="footer-top"><p className="footer-description"><strong>NETLORE</strong><span>{t.footerDescription}</span></p><SectionLink className="text-link" to="/promocion/"><span>{t.promoteServer}</span><Arrow /></SectionLink></div>
+    <div className="footer-top"><p className="footer-description"><strong>NetLore</strong><span>{t.footerDescription}</span></p><SectionLink className="text-link" to="/promocion/"><span>{t.promoteServer}</span><Arrow /></SectionLink></div>
     <div className="footer-legal"><SectionLink to="/privacidad/">{legal.privacy.title}</SectionLink><SectionLink to="/cookies/">{legal.cookies.title}</SectionLink><button type="button" ref={noticeTriggerRef} onClick={onOpenNotice}>{legal.openNotice}</button></div>
     <div className="footer-bottom"><span>{t.copyright}</span><SectionLink to="/"><span>{t.backTop}</span><Arrow>↑</Arrow></SectionLink></div>
   </footer>;
 }
 
 function Portal() {
-  return <MapPortal directory={<Directory />} promotion={<Promotion />} questions={<Questions />} citizen={<CitizenPass />} />;
+  return <Launcher hero={<Hero />} directory={<Directory />} promotion={<Promotion />} questions={<Questions />} citizen={<CitizenPass />} />;
 }
 
 function NotFound() {
   const { t } = useLanguage();
-  return <main className="not-found shell" id="contenido"><h1>{t.notFoundTitle}</h1><p>{t.notFoundText}</p><SectionLink className="button button-pink" to="/">{t.backHome}<Arrow /></SectionLink></main>;
+  return <main className="not-found shell" id="contenido"><h1>{t.notFoundTitle}</h1><p>{t.notFoundText}</p><SectionLink className="button button-gold" to="/">{t.backHome}<Arrow /></SectionLink></main>;
 }
 
 export default function App() {
@@ -208,7 +197,7 @@ export default function App() {
     return success;
   }
   const isPortal = ['/', '/index.html', '/servidores/', '/promocion/', '/informacion/', '/pase/'].includes(pathname);
-  return <div className={`${noticeVisible ? 'app-with-notice' : ''} ${isPortal ? 'map-application' : ''}`}>
+  return <div className={`${noticeVisible ? 'app-with-notice' : ''} ${isPortal ? 'launcher-app' : ''}`}>
     <NavigationEffects />
     <button className="skip-link" type="button" onClick={() => scrollToSection('contenido', true)}>{t.skip}</button>
     <Header />

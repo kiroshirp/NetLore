@@ -7,7 +7,7 @@ const oldRoutes = { '#inicio': '/', '#contenido': '/', '#servidores': '/servidor
 export function scrollToSection(id, focus = false) {
   const target = document.getElementById(id);
   if (!target) return;
-  if (id === 'inicio' || target.closest('.map-portal')) window.scrollTo({ top: 0, behavior: 'instant' });
+  if (id === 'inicio' || target.closest('.launcher')) window.scrollTo({ top: 0, behavior: 'instant' });
   else target.scrollIntoView({ block: 'start', behavior: 'instant' });
   if (focus) {
     const heading = target.querySelector('h1, h2') || target;

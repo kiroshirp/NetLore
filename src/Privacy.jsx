@@ -26,7 +26,7 @@ export function PrivacyNotice({ onDismiss, focusOnOpen, returnFocusRef }) {
       <p>{legal.notice.body}</p>
       <div className="privacy-notice-links"><SectionLink to="/cookies/">{legal.cookies.title}</SectionLink><SectionLink to="/privacidad/">{legal.privacy.title}</SectionLink></div>
     </div>
-    <button type="button" className="button button-pink" onClick={dismiss}>{legal.notice.dismiss}</button>
+    <button type="button" className="button button-gold" onClick={dismiss}>{legal.notice.dismiss}</button>
   </aside>;
 }
 

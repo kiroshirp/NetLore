@@ -1,4 +1,4 @@
-# Estado breve — 11/11/2026
+# Estado breve — 20/11/2026
 
 ## Arquitectura
 - React/Vite; frontend publicado en https://kiroshirp.github.io/NetLore/ mediante main/GitHub Actions.
@@ -24,3 +24,9 @@
 ## Publicación
 - Git CLI usa una identidad sin permisos de push; conexión GitHub del chat permitió publicaciones anteriores. Verificar cabeza remota y usar actualización condicionada a SHA.
 - Worker: helper local .local/cloudflare.mjs accede a credenciales sin imprimirlas. Mantener configuración de rate limiting en todo despliegue futuro.
+
+## Rediseño 20/11 (sin publicar, sin commit)
+- Interfaz nueva: lanzador con pestañas (Servidores/Promoción/Información/Pase) sobre Night City en dorado; en Inicio el hero queda a la izquierda y la ventana a la derecha. Subpestañas Todos/Promocionados/Gratuitos (`?lista=`), filas de servidor y fila punteada «Aparece aquí». Archivos: `Launcher.jsx`, `launcher.css`, `tokens.css`, `base.css`, `directory.css`, `styles.css`.
+- Retirado por decisión del propietario: mapa interactivo (arrastre, zoom, rueda), `map-wheel.mjs` y su prueba. Texto de promoción: «borde dorado». Tipografía Albert Sans autoalojada (@fontsource-variable, compatible con CSP).
+- Verificado en local: 46 pruebas y build; capturas Chromium a 1280, 820 y 390 px con fichas simuladas en el navegador (no tocan datos reales). Sloplint estático 0 FAIL; falta la capa de render (sin puppeteer-core).
+- Sin comprobar: admin con el tema nuevo (solo recoloreado automáticamente), navegador real y móviles reales, contraste medido. Nada desplegado: GitHub Pages depende de main y Cloudflare Pages es manual.
